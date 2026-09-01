@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>100 Pages</title>
+<meta name="description" content="1ページ1コンセプトで作る、100枚のウェブページ。すべて日本語で読める。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;500;800&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #0c0c0e; --fg: #f2f2f0; --mute: #8b8b90; --line: rgba(255,255,255,0.10); }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: "Noto Sans JP", "Inter", sans-serif;
+    min-height: 100vh; -webkit-font-smoothing: antialiased;
+  }
+  header { padding: clamp(40px, 8vw, 96px) clamp(20px, 5vw, 64px) 32px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; }
+  h1 { font-family: Inter, sans-serif; font-weight: 800; font-size: clamp(56px, 12vw, 160px); letter-spacing: -0.06em; line-height: .9; }
+  h1 span { display: block; font-family: "Noto Sans JP", sans-serif; font-weight: 300; font-size: clamp(14px, 1.6vw, 20px); letter-spacing: .3em; margin-top: 18px; color: var(--mute); }
+  .count { font-family: Inter, sans-serif; font-size: clamp(14px, 1.4vw, 18px); color: var(--mute); }
+  .count b { color: var(--fg); font-size: 2.4em; font-weight: 800; letter-spacing: -0.04em; margin-right: 6px; }
+
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px; background: var(--line); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .card {
+    background: var(--bg); padding: 28px 24px 24px; min-height: 300px;
+    display: flex; flex-direction: column; justify-content: space-between; gap: 40px;
+    text-decoration: none; color: inherit; position: relative; overflow: hidden;
+    transition: background .3s;
+  }
+  .card:hover { background: #141416; }
+  .card .no { font-family: Inter, sans-serif; font-weight: 800; font-size: 13px; letter-spacing: .1em; color: var(--mute); display: flex; justify-content: space-between; }
+  .card .no i { font-style: normal; font-weight: 400; }
+  .card h2 { font-size: clamp(22px, 2.4vw, 30px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; }
+  .card p { font-size: 13.5px; line-height: 1.8; color: var(--mute); margin-top: 10px; font-weight: 300; }
+  .card .art { position: absolute; right: -30px; bottom: -30px; width: 200px; height: 200px; border-radius: 50%; opacity: .55; transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .4s; pointer-events: none; }
+  .card:hover .art { transform: scale(1.25) rotate(-8deg); opacity: .9; }
+  .card.todo { color: var(--mute); pointer-events: none; }
+  .card.todo h2 { color: #3a3a3f; }
+  .card.todo .art { display: none; }
+
+  footer { padding: 40px clamp(20px, 5vw, 64px); color: var(--mute); font-size: 12px; line-height: 1.9; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>100<br>Pages<span>1ページ、1コンセプト。すべて日本語で読める。</span></h1>
+  <div class="count"><b id="done">0</b>/ 100</div>
+</header>
+
+<main class="grid" id="grid"></main>
+
+<footer>
+  <div>ルール：目を奪うこと。同じデザインを二度使わないこと。全力で遊ぶこと。</div>
+  <div>Claude Fable 5.1 が1ページずつ直列で制作</div>
+</footer>
+
+<script>
+  // ページを追加するときはここに1行足す
+  const pages = [
+    { file: '01-lighthouse.html', title: '第七灯台 守灯日誌', desc: '真っ暗な海。回転する灯台の光が当たった場所だけ、日誌が読める。押さえると止まり、引くと回る。', art: 'radial-gradient(circle at 30% 30%, #ffe9b0, #3a2f10 45%, #03070d 70%)' },
+    { file: '02-receipt.html', title: 'ある一日のレシート', desc: '感熱紙プリンターから、一日の出来事が明細として印字される。値引：気にしないこと。', art: 'repeating-linear-gradient(90deg, #f7f4ec 0 3px, #2a2622 3px 5px, #f7f4ec 5px 9px, #2a2622 9px 10px)' },
+    { file: '03-kyoto-asa.html', title: '京の朝、五つの音', desc: '和紙の上を右から左へ流れる縦書きの巻物。夜明けまでに拾った五つの音。', art: 'radial-gradient(circle at 40% 40%, #f2ede2, #b8302c 60%, #f2ede2 61%)' },
+    { file: '04-shinkai.html', title: '深海へ、一万メートル', desc: 'スクロールで潜る。深度計が回り、光が消え、懐中電灯でしか文字が読めなくなる。', art: 'linear-gradient(to bottom, #2fb7d9, #041f36 50%, #000)' },
+    { file: '05-tsuki.html', title: 'Tsuki', desc: '月を、机の上に。今夜の月齢と同じかたちに灯る架空のランプの製品ページ。スクロールで満ち欠けと分解図。', art: 'radial-gradient(circle at 40% 40%, #fbf7ee, #d8d2c4 60%, #9a9385)' },
+    { file: '06-omosa.html', title: '言葉の重さ', desc: 'クリックで言葉が落ちてきて床に積もる。掴んで投げる。「さよなら」は 6.4 kg。', art: 'linear-gradient(135deg, #000 0 50%, #e8ff2a 50%)' },
+  ];
+  const grid = document.getElementById('grid');
+  const total = 10; // 今回の目標本数（進むごとに増やす）
+  pages.forEach((p, i) => {
+    const a = document.createElement('a');
+    a.className = 'card'; a.href = 'pages/' + p.file;
+    a.innerHTML = `<div class="no"><span>No. ${String(i+1).padStart(3,'0')}</span><i>→</i></div><div><h2>${p.title}</h2><p>${p.desc}</p></div><div class="art" style="background:${p.art}"></div>`;
+    grid.appendChild(a);
+  });
+  for (let i = pages.length; i < total; i++) {
+    const d = document.createElement('div');
+    d.className = 'card todo';
+    d.innerHTML = `<div class="no"><span>No. ${String(i+1).padStart(3,'0')}</span></div><div><h2>制作中</h2></div>`;
+    grid.appendChild(d);
+  }
+  document.getElementById('done').textContent = pages.length;
+</script>
+</body>
+</html>

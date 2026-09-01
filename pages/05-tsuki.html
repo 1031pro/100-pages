@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tsuki</title>
+<meta name="description" content="月の満ち欠けを、机の上に。架空のランプ Tsuki の製品紹介ページ。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1d1d1f; --mute: #6e6e73; --line: #e5e5ea;
+    --moon-a: #fbf7ee; --moon-b: #d8d2c4; --moon-c: #9a9385;
+    --accent: #0071e3;
+    --p: 0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font-family: "Noto Sans JP", "Inter", "Hiragino Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* nav */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    height: 48px; backdrop-filter: saturate(180%) blur(20px);
+    background: rgba(255,255,255,0.72); border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 100%; font-size: 13px; }
+  nav .brand { font-family: Inter, sans-serif; font-weight: 700; letter-spacing: -0.02em; font-size: 16px; }
+  nav ul { list-style: none; display: flex; gap: 28px; color: var(--mute); }
+  nav ul li:hover { color: var(--fg); cursor: pointer; }
+  nav .buy { background: var(--accent); color: #fff; padding: 6px 14px; border-radius: 999px; font-size: 12px; }
+
+  /* 月本体 */
+  .moon {
+    position: relative; width: var(--size, 320px); height: var(--size, 320px); border-radius: 50%;
+    background:
+      radial-gradient(circle at 34% 30%, #fff 0, rgba(255,255,255,0) 28%),
+      radial-gradient(circle at 62% 66%, rgba(0,0,0,0.05) 0, transparent 22%),
+      radial-gradient(circle at 28% 62%, rgba(0,0,0,0.06) 0, transparent 12%),
+      radial-gradient(circle at 70% 30%, rgba(0,0,0,0.05) 0, transparent 9%),
+      radial-gradient(circle at 48% 48%, rgba(0,0,0,0.035) 0, transparent 18%),
+      radial-gradient(circle at 40% 40%, var(--moon-a) 0, var(--moon-b) 62%, var(--moon-c) 100%);
+    box-shadow:
+      inset -18px -22px 40px rgba(0,0,0,0.12),
+      0 40px 80px rgba(0,0,0,0.12),
+      0 0 0 1px rgba(0,0,0,0.03);
+    transition: filter .6s;
+  }
+  .moon::after {
+    /* 影：--p (0〜1) で満ち欠け */
+    content: ""; position: absolute; inset: -2px; border-radius: 50%;
+    background: radial-gradient(circle at calc(50% + (var(--p) * 2 - 1) * 110%) 50%, transparent 0, transparent 68%, rgba(20,22,30,0.9) 69%);
+    mix-blend-mode: multiply; pointer-events: none;
+  }
+  .moon .glow {
+    position: absolute; inset: -30%; border-radius: 50%; z-index: -1;
+    background: radial-gradient(circle, rgba(255,240,200,0.55), transparent 60%);
+    opacity: var(--glow, 0.35); transition: opacity .6s;
+  }
+  .base {
+    width: calc(var(--size, 320px) * 0.55); height: 14px; margin: 26px auto 0; border-radius: 999px;
+    background: linear-gradient(to bottom, #3a3a3c, #1d1d1f);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  }
+
+  /* hero */
+  .hero { text-align: center; padding: 90px 0 60px; }
+  .hero h1 { font-family: Inter, sans-serif; font-size: clamp(56px, 9vw, 96px); font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+  .hero h2 { font-size: clamp(22px, 3.2vw, 34px); font-weight: 500; margin-top: 16px; letter-spacing: -0.01em; }
+  .hero .links { margin-top: 18px; font-size: 17px; display: flex; gap: 28px; justify-content: center; }
+  .hero .links a::after { content: " ›"; }
+  .hero .stage { margin: 56px auto 0; display: grid; place-items: center; --size: min(420px, 70vw); }
+  .hero .moon { animation: float 7s ease-in-out infinite; }
+  @keyframes float { 50% { transform: translateY(-10px); } }
+
+  /* 見出しの大きな一行 */
+  .statement { padding: 110px 0 60px; text-align: center; }
+  .statement p { font-size: clamp(28px, 5vw, 56px); font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; max-width: 20em; margin: 0 auto; }
+  .statement p span { color: var(--mute); }
+
+  /* スティッキー特集 */
+  .feature { position: relative; }
+  .feature .sticky { position: sticky; top: 48px; height: calc(100vh - 48px); display: grid; place-items: center; --size: min(380px, 60vw); }
+  .feature .panels { position: relative; z-index: 2; margin-top: calc(-100vh + 48px); }
+  .feature .panel {
+    min-height: 100vh; display: flex; align-items: center;
+  }
+  .feature .panel .card {
+    background: rgba(255,255,255,0.86); backdrop-filter: blur(16px);
+    border-radius: 24px; padding: 40px 44px; max-width: 420px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.10);
+    margin-left: auto;
+  }
+  .feature .panel:nth-child(even) .card { margin-left: 0; margin-right: auto; }
+  .card h3 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.25; }
+  .card p { margin-top: 12px; color: var(--mute); font-size: 16px; line-height: 1.8; }
+  .card .k { font-family: Inter, sans-serif; font-weight: 700; font-size: 44px; letter-spacing: -0.04em; margin-bottom: 8px; }
+  .card .k small { font-size: 16px; color: var(--mute); margin-left: 4px; font-weight: 500; }
+
+  /* 分解図 */
+  .exploded { background: #000; color: #f5f5f7; padding: 140px 0; overflow: hidden; }
+  .exploded h2 { text-align: center; font-size: clamp(32px, 5vw, 56px); font-weight: 700; letter-spacing: -0.03em; }
+  .exploded .sub { text-align: center; color: #a1a1a6; margin-top: 14px; font-size: 18px; }
+  .exploded .rig { position: relative; height: 640px; margin-top: 60px; --e: 0; }
+  .exploded .layer {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) translateY(calc(var(--dy) * var(--e))) scale(var(--s, 1));
+    transition: transform .1s linear;
+  }
+  .exploded .layer .lbl {
+    position: absolute; left: calc(100% + 40px); top: 50%; transform: translateY(-50%);
+    white-space: nowrap; font-size: 14px; color: #a1a1a6; opacity: var(--e);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .exploded .layer .lbl::before { content: ""; width: 60px; height: 1px; background: #48484a; }
+  .exploded .layer .lbl b { color: #f5f5f7; display: block; font-size: 16px; }
+  .shell { width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.95), rgba(220,214,200,0.35) 70%, rgba(200,195,180,0.1)); border: 1px solid rgba(255,255,255,0.2); }
+  .ring { width: 200px; height: 200px; border-radius: 50%; border: 14px solid transparent; background: conic-gradient(#ffd27a, #fff3d0, #ffb347, #ffd27a) border-box; -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; box-shadow: 0 0 60px rgba(255,200,120,0.35); }
+  .board { width: 150px; height: 150px; border-radius: 50%; background: #0f3d2e; background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 10px), repeating-linear-gradient(0deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 10px); border: 2px solid #1f6b52; }
+  .stem { width: 26px; height: 120px; border-radius: 13px; background: linear-gradient(to right, #2c2c2e, #6e6e73, #2c2c2e); }
+  .foot { width: 220px; height: 22px; border-radius: 999px; background: linear-gradient(to bottom, #48484a, #1c1c1e); }
+
+  /* 色 */
+  .colors { padding: 140px 0; text-align: center; }
+  .colors h2 { font-size: clamp(32px, 5vw, 56px); font-weight: 700; letter-spacing: -0.03em; }
+  .colors .stage { margin: 50px auto 30px; display: grid; place-items: center; --size: min(300px, 60vw); }
+  .swatches { display: flex; gap: 18px; justify-content: center; }
+  .swatches button {
+    width: 34px; height: 34px; border-radius: 50%; border: 0; cursor: pointer; position: relative;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.12);
+  }
+  .swatches button.on::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--accent); }
+  .swatches + .name { margin-top: 16px; color: var(--mute); font-size: 15px; }
+
+  /* スペック */
+  .specs { border-top: 1px solid var(--line); padding: 100px 0; }
+  .specs h2 { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 40px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 40px 32px; }
+  .grid .k { font-family: Inter, sans-serif; font-size: 40px; font-weight: 700; letter-spacing: -0.04em; }
+  .grid .k small { font-size: 18px; color: var(--mute); font-weight: 600; margin-left: 3px; }
+  .grid .d { color: var(--mute); margin-top: 6px; line-height: 1.7; font-size: 15px; }
+
+  /* 比較 */
+  .compare { background: #f5f5f7; padding: 100px 0; }
+  .compare h2 { text-align: center; font-size: 40px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 50px; }
+  table { width: 100%; border-collapse: collapse; max-width: 760px; margin: 0 auto; font-size: 15px; }
+  th { text-align: center; padding: 0 0 22px; font-family: Inter, sans-serif; font-size: 22px; letter-spacing: -0.02em; }
+  th small { display: block; font-family: "Noto Sans JP", sans-serif; font-size: 13px; color: var(--mute); font-weight: 500; margin-top: 4px; }
+  td { padding: 16px 12px; border-top: 1px solid #d2d2d7; text-align: center; }
+  td:first-child { text-align: left; color: var(--mute); width: 34%; }
+  td .yes { color: var(--fg); font-weight: 500; }
+  td .no { color: #c7c7cc; }
+
+  /* CTA */
+  .cta { padding: 120px 0; text-align: center; }
+  .cta .price { font-family: Inter, sans-serif; font-size: 56px; font-weight: 700; letter-spacing: -0.04em; }
+  .cta .price small { font-size: 18px; color: var(--mute); font-weight: 500; }
+  .cta p { color: var(--mute); margin-top: 10px; }
+  .cta .btn { display: inline-block; margin-top: 28px; background: var(--accent); color: #fff; padding: 14px 32px; border-radius: 999px; font-size: 17px; font-weight: 500; }
+  footer { border-top: 1px solid var(--line); padding: 30px 0; color: var(--mute); font-size: 12px; text-align: center; line-height: 1.8; }
+
+  @media (max-width: 720px) {
+    nav ul { display: none; }
+    .feature .panel .card { margin: 0 auto; padding: 28px; }
+    .exploded .layer .lbl { display: none; }
+    .exploded .rig { height: 520px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">Tsuki</div>
+    <ul><li>概要</li><li>仕組み</li><li>仕様</li><li>比較</li></ul>
+    <a class="buy" href="#buy">購入</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Tsuki</h1>
+    <h2>月を、机の上に。</h2>
+    <div class="links"><a href="#feature">詳しく見る</a><a href="#buy">¥39,800から</a></div>
+    <div class="stage">
+      <div class="moon" id="heroMoon" style="--p:0.62"><div class="glow"></div></div>
+      <div class="base"></div>
+    </div>
+  </div>
+</section>
+
+<section class="statement">
+  <div class="wrap">
+    <p>今夜の月と、同じかたち。<span>29.5日の周期を、そのまま部屋に。</span></p>
+  </div>
+</section>
+
+<section class="feature" id="feature">
+  <div class="sticky">
+    <div>
+      <div class="moon" id="featMoon" style="--p:0"><div class="glow"></div></div>
+      <div class="base"></div>
+    </div>
+  </div>
+  <div class="panels wrap">
+    <div class="panel"><div class="card">
+      <div class="k">29.5<small>日</small></div>
+      <h3>本物の周期で、満ちて、欠ける。</h3>
+      <p>内蔵の天文暦が、あなたの街の月齢を計算します。新月には静かに消え、満月には部屋いっぱいに灯る。スクロールして、ひと月を早送りしてみてください。</p>
+    </div></div>
+    <div class="panel"><div class="card">
+      <div class="k">0<small>ボタン</small></div>
+      <h3>触れずに、灯す。</h3>
+      <p>手をかざすだけで明るさが変わります。スイッチも、アプリも、設定も要りません。月に、電源ボタンは付いていませんから。</p>
+    </div></div>
+    <div class="panel"><div class="card">
+      <div class="k">2700<small>K</small></div>
+      <h3>静けさの、色温度。</h3>
+      <p>夜更けの読書のために調整した、ろうそくより少しだけ白い光。ブルーライトをほぼ含まず、眠りの邪魔をしません。</p>
+    </div></div>
+    <div class="panel"><div class="card">
+      <div class="k">100<small>%</small></div>
+      <h3>満月。</h3>
+      <p>ひと月にいちどだけ、全灯。この日は自動で、少し長く灯ります。</p>
+    </div></div>
+  </div>
+</section>
+
+<section class="exploded" id="how">
+  <div class="wrap">
+    <h2>中身も、月のように。</h2>
+    <p class="sub">スクロールすると、Tsuki が分解されます。</p>
+    <div class="rig" id="rig">
+      <div class="layer" style="--dy:-220px"><div class="shell"></div><div class="lbl"><span><b>光拡散シェル</b>吹きガラス、厚さ 2.4 mm</span></div></div>
+      <div class="layer" style="--dy:-80px"><div class="ring"></div><div class="lbl"><span><b>フルスペクトル LED リング</b>Ra 97、2700K、96 灯</span></div></div>
+      <div class="layer" style="--dy:60px"><div class="board"></div><div class="lbl"><span><b>天文暦モジュール</b>月齢計算・近接センサー</span></div></div>
+      <div class="layer" style="--dy:190px"><div class="stem"></div><div class="lbl"><span><b>支柱</b>削り出しアルミニウム</span></div></div>
+      <div class="layer" style="--dy:300px"><div class="foot"></div><div class="lbl"><span><b>ベース</b>鋳鉄、980 g</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="colors">
+  <div class="wrap">
+    <h2>三つの月。</h2>
+    <div class="stage">
+      <div class="moon" id="colorMoon" style="--p:0.5"><div class="glow"></div></div>
+      <div class="base"></div>
+    </div>
+    <div class="swatches" id="swatches">
+      <button class="on" data-name="白磁" data-a="#fbf7ee" data-b="#d8d2c4" data-c="#9a9385" style="background:#e9e4d8"></button>
+      <button data-name="砂" data-a="#f4e3c6" data-b="#d3b98d" data-c="#8f7752" style="background:#d9c39c"></button>
+      <button data-name="墨" data-a="#7a7d86" data-b="#3a3d45" data-c="#15171c" style="background:#3a3d45"></button>
+    </div>
+    <div class="name" id="colorName">白磁</div>
+  </div>
+</section>
+
+<section class="specs" id="specs">
+  <div class="wrap">
+    <h2>仕様</h2>
+    <div class="grid">
+      <div><div class="k">Ø24<small>cm</small></div><div class="d">直径。満月のときの視直径が、腕を伸ばした距離で見た本物の月と同じになります。</div></div>
+      <div><div class="k">1.4<small>kg</small></div><div class="d">総重量。倒れません。</div></div>
+      <div><div class="k">2<small>W</small></div><div class="d">最大消費電力。ひと月点けっぱなしで約 30 円。</div></div>
+      <div><div class="k">±1<small>日</small></div><div class="d">月齢精度。位置情報なしでも、2099 年まで正確。</div></div>
+      <div><div class="k">0<small>dB</small></div><div class="d">動作音。ファンも、モーターも、ありません。</div></div>
+      <div><div class="k">10<small>年</small></div><div class="d">LED 寿命の目安。毎晩 6 時間で計算。</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="compare">
+  <div class="wrap">
+    <h2>どちらの月にしますか。</h2>
+    <table>
+      <thead><tr><th></th><th>Tsuki<small>¥39,800</small></th><th>Tsuki Pro<small>¥64,800</small></th></tr></thead>
+      <tbody>
+        <tr><td>月齢の自動追従</td><td><span class="yes">○</span></td><td><span class="yes">○</span></td></tr>
+        <tr><td>手かざし調光</td><td><span class="yes">○</span></td><td><span class="yes">○</span></td></tr>
+        <tr><td>月の出・月の入りに連動</td><td><span class="no">—</span></td><td><span class="yes">○</span></td></tr>
+        <tr><td>月食の再現</td><td><span class="no">—</span></td><td><span class="yes">○</span></td></tr>
+        <tr><td>クレーターの立体表面</td><td><span class="no">—</span></td><td><span class="yes">○</span></td></tr>
+        <tr><td>シェル素材</td><td>吹きガラス</td><td>磁器</td></tr>
+        <tr><td>色</td><td>白磁・砂・墨</td><td>白磁・墨</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="cta" id="buy">
+  <div class="wrap">
+    <div class="price">¥39,800<small>（税込）</small></div>
+    <p>次の新月に発送します。</p>
+    <a class="btn" href="#">Tsuki を購入</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Tsuki は架空の製品です。このページはデザイン習作として作られました。<br>月齢は現在の日時から近似計算しています。</div>
+</footer>
+
+<script>
+(() => {
+  // 実際の月齢（近似）：2000-01-06 18:14 UTC を新月基準に
+  const synodic = 29.530588853;
+  const ref = Date.UTC(2000, 0, 6, 18, 14);
+  const age = ((Date.now() - ref) / 864e5) % synodic;
+  const phaseNow = age / synodic; // 0=新月 0.5=満月
+  // --p: 0=新月, 0.5=満月, 1=次の新月 に写像（影の位置）
+  const heroMoon = document.getElementById('heroMoon');
+  heroMoon.style.setProperty('--p', phaseNow.toFixed(3));
+  heroMoon.style.setProperty('--glow', (0.2 + 0.6 * Math.sin(phaseNow * Math.PI)).toFixed(2));
+
+  // スティッキー特集：スクロール進捗で満ち欠け
+  const feat = document.querySelector('.feature');
+  const featMoon = document.getElementById('featMoon');
+  const rig = document.getElementById('rig');
+  const onScroll = () => {
+    const r = feat.getBoundingClientRect();
+    const total = feat.offsetHeight - window.innerHeight;
+    const prog = Math.min(1, Math.max(0, -r.top / total));
+    // 0→1 で新月→満月→新月を一周半：最後のパネルで満月
+    const p = prog < 0.85 ? prog / 0.85 * 0.5 : 0.5;
+    featMoon.style.setProperty('--p', p.toFixed(3));
+    featMoon.style.setProperty('--glow', (0.15 + 0.85 * Math.sin(p * Math.PI)).toFixed(2));
+
+    // 分解図
+    const rr = rig.getBoundingClientRect();
+    const e = Math.min(1, Math.max(0, (window.innerHeight * 0.75 - rr.top) / (window.innerHeight * 0.7)));
+    rig.style.setProperty('--e', e.toFixed(3));
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  onScroll();
+
+  // 色
+  const sw = document.getElementById('swatches');
+  const name = document.getElementById('colorName');
+  const colorMoon = document.getElementById('colorMoon');
+  sw.addEventListener('click', (ev) => {
+    const b = ev.target.closest('button'); if (!b) return;
+    [...sw.children].forEach(x => x.classList.toggle('on', x === b));
+    colorMoon.style.setProperty('--moon-a', b.dataset.a);
+    colorMoon.style.setProperty('--moon-b', b.dataset.b);
+    colorMoon.style.setProperty('--moon-c', b.dataset.c);
+    name.textContent = b.dataset.name;
+  });
+
+  // 手かざし：ヒーローの月にマウスを近づけると明るくなる
+  addEventListener('pointermove', (e) => {
+    const r = heroMoon.getBoundingClientRect();
+    const d = Math.hypot(e.clientX - (r.left + r.width/2), e.clientY - (r.top + r.height/2));
+    const near = Math.max(0, 1 - d / 420);
+    heroMoon.style.filter = `brightness(${1 + near * 0.18})`;
+  });
+})();
+</script>
+</body>
+</html>

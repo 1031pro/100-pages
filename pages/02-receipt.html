@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ある一日のレシート</title>
+<meta name="description" content="一日の出来事を感熱紙のレシートに印字する。スクロールで紙が出てくる。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: auto; }
+  body {
+    background: #1f2226;
+    background-image:
+      radial-gradient(ellipse 70% 40% at 50% 0%, rgba(255,255,255,0.06), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 2px, transparent 2px 6px);
+    font-family: "DotGothic16", "MS Gothic", monospace;
+    color: #2a2622;
+    min-height: 100vh;
+  }
+
+  /* プリンター */
+  .printer {
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    width: 460px; height: 118px; z-index: 10;
+    background: linear-gradient(to bottom, #d9dbdf 0%, #c3c6cb 45%, #9fa3a9 100%);
+    border-radius: 0 0 14px 14px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.55), inset 0 -3px 0 rgba(0,0,0,0.15);
+  }
+  .printer::before {
+    content: ""; position: absolute; left: 36px; right: 36px; bottom: 26px; height: 12px;
+    background: #14161a; border-radius: 3px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.9), 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .printer .label {
+    position: absolute; left: 40px; top: 30px;
+    font-size: 11px; letter-spacing: .3em; color: #4a4f57;
+  }
+  .printer .led {
+    position: absolute; right: 44px; top: 34px; width: 10px; height: 10px; border-radius: 50%;
+    background: #35d07f; box-shadow: 0 0 10px #35d07f;
+    animation: blink 1.4s steps(1) infinite;
+  }
+  body.printing .printer .led { background: #ffb020; box-shadow: 0 0 12px #ffb020; animation: blink .18s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  .printer button {
+    position: absolute; right: 40px; bottom: 46px;
+    font: inherit; font-size: 11px; letter-spacing: .2em;
+    background: #2b2f35; color: #dfe3e8; border: 0; border-radius: 4px;
+    padding: 6px 10px; cursor: pointer;
+    box-shadow: 0 2px 0 #111, 0 3px 6px rgba(0,0,0,.4);
+  }
+  .printer button:active { transform: translateY(2px); box-shadow: 0 0 0 #111; }
+
+  /* 紙 */
+  .paper-wrap { padding: 96px 0 30vh; display: flex; justify-content: center; }
+  .paper {
+    width: 380px; max-width: calc(100vw - 24px);
+    background: #f7f4ec;
+    background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.018) 0 1px, transparent 1px 3px);
+    padding: 34px 26px 44px;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 2px 0 rgba(255,255,255,0.5) inset;
+    position: relative;
+    font-size: 15px; line-height: 1.55;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    padding-bottom: 60px;
+  }
+  /* 下端のギザギザ */
+  .paper::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 14px;
+    background: linear-gradient(135deg, transparent 50%, #f7f4ec 50%) 0 0 / 14px 14px, linear-gradient(-135deg, transparent 50%, #f7f4ec 50%) 0 0 / 14px 14px;
+    background-repeat: repeat-x;
+    transform: translateY(100%);
+  }
+  .paper { mask: none; -webkit-mask: none; }
+
+  .line { opacity: 0; transform: translateY(-2px); filter: blur(1px); white-space: pre-wrap; }
+  .line.printed { animation: print .28s steps(4) forwards; }
+  @keyframes print {
+    0% { opacity: 0; clip-path: inset(0 0 100% 0); filter: blur(1px); }
+    100% { opacity: 1; clip-path: inset(0 0 0 0); filter: blur(0); transform: none; }
+  }
+  .line.faint { opacity: .55 !important; }
+  .row { display: flex; justify-content: space-between; gap: 12px; }
+  .row .n { flex: 1; }
+  .row .q { width: 3.2em; text-align: right; opacity: .8; }
+  .row .p { width: 6.5em; text-align: right; }
+  .center { text-align: center; }
+  .big { font-size: 24px; letter-spacing: .1em; line-height: 1.3; }
+  .huge { font-size: 34px; line-height: 1.2; }
+  .sep { border-top: 1px dashed #8a847a; margin: 10px 0; height: 0; }
+  .sep2 { border-top: 2px solid #2a2622; margin: 10px 0; height: 0; }
+  .note { font-size: 12.5px; opacity: .85; }
+  .tag { display: inline-block; border: 1px solid #2a2622; padding: 0 5px; font-size: 11px; margin-left: 6px; vertical-align: 1px; }
+  .barcode {
+    height: 58px; margin: 14px 0 4px;
+    background: repeating-linear-gradient(90deg,
+      #2a2622 0 2px, transparent 2px 4px, #2a2622 4px 5px, transparent 5px 8px,
+      #2a2622 8px 11px, transparent 11px 12px, #2a2622 12px 13px, transparent 13px 16px,
+      #2a2622 16px 17px, transparent 17px 20px, #2a2622 20px 23px, transparent 23px 24px);
+  }
+  .stamp {
+    position: absolute; right: 26px; top: 40px; width: 78px; height: 78px; border-radius: 50%;
+    border: 3px double #c0392b; color: #c0392b; display: grid; place-items: center;
+    font-size: 12px; line-height: 1.25; text-align: center; letter-spacing: .05em;
+    transform: rotate(-14deg); opacity: 0; mix-blend-mode: multiply;
+  }
+  .stamp.on { animation: stamp .25s cubic-bezier(.2,2,.4,1) forwards; }
+  @keyframes stamp { from { opacity: 0; transform: rotate(-14deg) scale(1.8); } to { opacity: .85; transform: rotate(-14deg) scale(1); } }
+
+  .footer-hint {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    font-size: 11px; letter-spacing: .25em; color: rgba(255,255,255,0.5);
+    transition: opacity .6s;
+  }
+  body.scrolled .footer-hint { opacity: 0; }
+
+  @media (max-width: 520px) {
+    .printer { width: 100vw; border-radius: 0; height: 100px; }
+    .printer .label { left: 20px; top: 22px; }
+    .printer button { right: 20px; bottom: 40px; }
+    .printer .led { right: 20px; top: 24px; }
+    .paper { padding: 26px 16px 50px; font-size: 14px; }
+    .stamp { right: 14px; width: 66px; height: 66px; font-size: 10.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="printer">
+  <div class="label">THERMAL RECEIPT PRINTER TR-24</div>
+  <div class="led"></div>
+  <button id="reprint">別の一日を印字</button>
+</div>
+
+<div class="paper-wrap">
+  <div class="paper" id="paper">
+    <div class="stamp" id="stamp">領収<br>済</div>
+  </div>
+</div>
+
+<div class="footer-hint">スクロールで印字が進む</div>
+
+<script>
+(() => {
+  const paper = document.getElementById('paper');
+  const stamp = document.getElementById('stamp');
+  const rnd = (a) => a[Math.floor(Math.random() * a.length)];
+  const pad = (s, n) => String(s).padStart(n, '0');
+
+  const pools = {
+    morning: [
+      ['朝の光（窓越し）', 1, '¥0'],
+      ['二度寝', 1, '¥0', '返品不可'],
+      ['目覚ましの音', 3, '¥0'],
+      ['熱いシャワー', 1, '¥38'],
+      ['トースト（焦げ気味）', 1, '¥42'],
+      ['コーヒー ブラック', 1, '¥480'],
+      ['満員電車 27分', 1, '¥220'],
+      ['自転車 追い風', 1, '¥0', '季節限定'],
+    ],
+    day: [
+      ['会議', 3, '¥0', '返品不可'],
+      ['メール 返信', 41, '¥0'],
+      ['海老天そば', 1, '¥920'],
+      ['コンビニのおにぎり', 2, '¥276'],
+      ['溜め息', 14, '¥0'],
+      ['同僚の冗談', 1, '¥0', '税込'],
+      ['ちいさな達成', 1, '¥0', '非売品'],
+      ['缶コーヒー 自販機', 1, '¥130'],
+      ['集中 1時間40分', 1, '¥0'],
+      ['書類の誤字 発見', 1, '¥0', 'ポイント2倍'],
+    ],
+    evening: [
+      ['夕焼け', 1, '¥0', '季節限定'],
+      ['帰り道の犬', 1, '¥0'],
+      ['スーパーの半額シール', 2, '¥398'],
+      ['湯船', 1, '¥64'],
+      ['ビール 350ml', 1, '¥228'],
+      ['誰かからの電話 12分', 1, '¥0'],
+      ['読みかけの本 18ページ', 1, '¥0'],
+      ['洗濯物 たたむ', 1, '¥0', '明日に繰越'],
+      ['星 見えた', 2, '¥0', '非売品'],
+      ['眠気', 1, '¥0'],
+    ],
+  };
+  const weather = ['晴れ', '曇り', '雨のち晴れ', '小雨', '快晴', '霧'];
+  const stores = ['LIFE MART 24h 本店', 'ひのき通り店', '駅前店', '第二市場店'];
+  const closing = [
+    '本日もお疲れさまでした。',
+    '返品・交換はできませんが、\n明日また新しいものが入荷します。',
+    '当店は年中無休です。',
+    'お忘れ物はございませんか。',
+  ];
+
+  const pick = (arr, n) => arr.slice().sort(() => Math.random() - .5).slice(0, n).sort(() => Math.random() - .5);
+
+  const yen = (s) => parseInt(s.replace(/[¥,]/g, ''), 10) || 0;
+
+  const build = () => {
+    const now = new Date();
+    const date = `${now.getFullYear()}/${pad(now.getMonth()+1,2)}/${pad(now.getDate(),2)}`;
+    const time = `${pad(now.getHours(),2)}:${pad(now.getMinutes(),2)}`;
+    const items = [...pick(pools.morning, 4), ...pick(pools.day, 5), ...pick(pools.evening, 5)];
+    const total = items.reduce((s, it) => s + yen(it[2]) * (yen(it[2]) ? 1 : 0), 0);
+    const count = items.reduce((s, it) => s + it[1], 0);
+    const no = Math.floor(1000 + Math.random() * 9000);
+    const lines = [];
+    const L = (html, cls = '') => lines.push({ html, cls });
+
+    L('LIFE MART', 'center huge');
+    L(rnd(stores), 'center');
+    L('TEL 000-0000-0000', 'center note');
+    L(`${date}(${'日月火水木金土'[now.getDay()]}) ${time}`, 'center note');
+    L(`レジ 03　　担当 じぶん　　天候 ${rnd(weather)}`, 'note');
+    L('', 'sep2');
+    L('ある一日 明細', 'center big');
+    L('', 'sep');
+    items.forEach(([n, q, p, tag]) => {
+      const t = tag ? `<span class="tag">${tag}</span>` : '';
+      L(`<span class="n">${n}${t}</span><span class="q">×${q}</span><span class="p">${p}</span>`, 'row');
+    });
+    L('', 'sep');
+    L(`<span class="n">小計（${count}点）</span><span class="p">¥${total.toLocaleString()}</span>`, 'row');
+    L(`<span class="n">内 消費税</span><span class="p">¥${Math.round(total/11).toLocaleString()}</span>`, 'row note');
+    L(`<span class="n">値引 気にしないこと</span><span class="p">-¥${Math.round(total*0.1).toLocaleString()}</span>`, 'row');
+    L('', 'sep2');
+    L(`<span class="n"><b>合計</b></span><span class="p big">¥${Math.round(total*0.9).toLocaleString()}</span>`, 'row');
+    L(`<span class="n">お預り 時間</span><span class="p">24:00</span>`, 'row');
+    L(`<span class="n">お釣り</span><span class="p">00:00</span>`, 'row');
+    L('', 'sep');
+    L(`<span class="n">本日のポイント</span><span class="p">1 日</span>`, 'row');
+    L(`<span class="n">累計ポイント</span><span class="p">${Math.floor(9000 + Math.random()*9000).toLocaleString()} 日</span>`, 'row');
+    L('', 'sep');
+    L('', 'barcode');
+    L(`No.${no}-${pad(now.getHours(),2)}${pad(now.getMinutes(),2)}`, 'center note');
+    L('', 'sep');
+    L(rnd(closing), 'center');
+    L('またお越しくださいませ', 'center');
+    L('※ この一日の返品は承っておりません', 'note center faint');
+    return lines;
+  };
+
+  let io;
+  const render = () => {
+    document.body.classList.add('printing');
+    stamp.classList.remove('on');
+    [...paper.querySelectorAll('.line')].forEach(n => n.remove());
+    if (io) io.disconnect();
+    const lines = build();
+    const nodes = lines.map(({ html, cls }) => {
+      const d = document.createElement('div');
+      d.className = 'line ' + cls;
+      d.innerHTML = html || '&nbsp;';
+      if (cls.includes('sep') || cls.includes('barcode')) d.innerHTML = '';
+      paper.appendChild(d);
+      return d;
+    });
+    // ビューポートに入った行から順に印字（少しずつ時間差をつける）
+    let queue = Promise.resolve();
+    io = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (!en.isIntersecting || en.target.classList.contains('printed')) return;
+        const el = en.target;
+        queue = queue.then(() => new Promise(r => setTimeout(() => {
+          el.classList.add('printed');
+          if (el === nodes[nodes.length - 1]) { stamp.classList.add('on'); document.body.classList.remove('printing'); }
+          r();
+        }, 55)));
+        io.unobserve(el);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.01 });
+    nodes.forEach(n => io.observe(n));
+  };
+
+  render();
+  document.getElementById('reprint').addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(render, 350);
+  });
+  addEventListener('scroll', () => document.body.classList.add('scrolled'), { passive: true, once: true });
+})();
+</script>
+</body>
+</html>

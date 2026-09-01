@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>言葉の重さ</title>
+<meta name="description" content="言葉には重さがある。クリックで落とし、掴んで投げる。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@900&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  :root { --y: #e8ff2a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: #fff; color: #000;
+    font-family: "Noto Sans JP", "Archivo Black", sans-serif; font-weight: 900;
+    user-select: none; -webkit-user-select: none; touch-action: none;
+    cursor: crosshair;
+  }
+  .world { position: fixed; inset: 0; }
+  .word {
+    position: absolute; left: 0; top: 0;
+    white-space: nowrap; line-height: 1;
+    padding: .08em .12em;
+    background: #000; color: #fff;
+    will-change: transform;
+    cursor: grab;
+    box-shadow: 0 0 0 3px #000;
+  }
+  .word.hi { background: var(--y); color: #000; }
+  .word.grab { cursor: grabbing; box-shadow: 0 0 0 3px var(--y); }
+  .word small { display: block; font-size: .28em; letter-spacing: .1em; font-weight: 900; opacity: .7; margin-top: .1em; }
+
+  .ui { position: fixed; left: 0; right: 0; top: 0; padding: 22px 26px; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; z-index: 5; }
+  .ui h1 { font-size: clamp(28px, 5vw, 64px); line-height: 1.08; letter-spacing: -0.03em; }
+  .ui h1 span { background: var(--y); padding: 0 .1em; }
+  .ui .r { text-align: right; font-size: 12px; letter-spacing: .15em; line-height: 1.9; }
+  .ui .r b { display: block; font-size: 40px; line-height: 1; letter-spacing: -0.03em; }
+  .ui .r i { font-style: normal; font-size: 10px; }
+  .hint { position: fixed; left: 26px; bottom: 22px; font-size: 12px; letter-spacing: .15em; z-index: 5; pointer-events: none; }
+  .hint::before { content: ""; display: inline-block; width: 14px; height: 14px; background: var(--y); border: 3px solid #000; margin-right: 10px; vertical-align: -2px; }
+  .btns { position: fixed; right: 26px; bottom: 22px; display: flex; gap: 8px; z-index: 5; }
+  .btns button {
+    font: inherit; font-size: 12px; letter-spacing: .15em; padding: 10px 14px;
+    background: #fff; border: 3px solid #000; cursor: pointer;
+  }
+  .btns button:hover { background: var(--y); }
+  .floor { position: fixed; left: 0; right: 0; bottom: 0; height: 6px; background: #000; }
+  .floor::before { content: ""; position: absolute; left: 0; right: 0; top: -14px; height: 14px; background: repeating-linear-gradient(-45deg, #000 0 6px, transparent 6px 14px); opacity: .9; }
+</style>
+</head>
+<body>
+
+<div class="ui">
+  <h1>言葉には<br><span>重さ</span>がある。</h1>
+  <div class="r"><b id="kg">0.0</b>kg<i><br>床の上の合計</i></div>
+</div>
+<div class="world" id="world"></div>
+<div class="floor"></div>
+<div class="hint">どこかをクリックして、次の言葉を落とす。掴んで投げられる。</div>
+<div class="btns"><button id="shake">揺らす</button><button id="clear">片づける</button></div>
+
+<script>
+(() => {
+  const W = document.getElementById('world');
+  const kgEl = document.getElementById('kg');
+  // 言葉と重さ（kg）：重いほど大きく、落ちるのも速い
+  const vocab = [
+    ['ごめん', 4.2], ['ありがとう', 1.1], ['まだ', 0.6], ['いつか', 0.3], ['大丈夫', 2.8],
+    ['忘れない', 5.5], ['やめる', 3.9], ['はじめる', 1.7], ['ただいま', 0.9], ['さよなら', 6.4],
+    ['好き', 2.2], ['嫌い', 3.3], ['知らない', 1.4], ['信じる', 4.8], ['疲れた', 2.6],
+    ['行く', 1.2], ['帰る', 1.0], ['会いたい', 3.7], ['またね', 0.5], ['やっぱり', 1.9],
+    ['ほんとうは', 4.4], ['なんでもない', 2.1], ['おやすみ', 0.7], ['ずっと', 5.1], ['もういい', 3.5],
+  ];
+  const G = 2600; // px/s^2
+  const bodies = [];
+  let W_ = innerWidth, H_ = innerHeight;
+  const floorY = () => H_ - 6;
+  addEventListener('resize', () => { W_ = innerWidth; H_ = innerHeight; });
+
+  let next = 0;
+  const shuffled = vocab.slice().sort(() => Math.random() - .5);
+
+  const spawn = (x, y) => {
+    const [text, kg] = shuffled[next++ % shuffled.length];
+    const el = document.createElement('div');
+    el.className = 'word' + (Math.random() < 0.18 ? ' hi' : '');
+    const fs = 26 + kg * 13; // 30〜110px
+    el.style.fontSize = fs + 'px';
+    el.innerHTML = `${text}<small>${kg.toFixed(1)} kg</small>`;
+    W.appendChild(el);
+    const r = el.getBoundingClientRect();
+    const b = { el, w: r.width, h: r.height, x: Math.min(Math.max(0, x - r.width / 2), W_ - r.width), y: y ?? -r.height - 10, vx: (Math.random() - .5) * 120, vy: 0, m: kg, rest: 0.18, grab: false, tilt: (Math.random() - .5) * 3 };
+    bodies.push(b);
+    return b;
+  };
+
+  // 物理：AABB 同士の押し出し（質量比で分配）＋床・壁
+  let last = performance.now();
+  const step = (now) => {
+    let dt = Math.min(0.033, (now - last) / 1000); last = now;
+    const sub = 3; dt /= sub;
+    for (let s = 0; s < sub; s++) {
+      for (const b of bodies) {
+        if (b.grab) continue;
+        b.vy += G * dt;
+        b.vx *= 0.999;
+        b.x += b.vx * dt; b.y += b.vy * dt;
+        // 床
+        if (b.y + b.h > floorY()) { b.y = floorY() - b.h; if (b.vy > 0) b.vy = -b.vy * b.rest; b.vx *= 0.82; if (Math.abs(b.vy) < 40) b.vy = 0; }
+        // 壁
+        if (b.x < 0) { b.x = 0; b.vx = -b.vx * 0.4; }
+        if (b.x + b.w > W_) { b.x = W_ - b.w; b.vx = -b.vx * 0.4; }
+      }
+      for (let iter = 0; iter < 2; iter++) {
+        for (let i = 0; i < bodies.length; i++) for (let j = i + 1; j < bodies.length; j++) {
+          const a = bodies[i], c = bodies[j];
+          const ox = Math.min(a.x + a.w, c.x + c.w) - Math.max(a.x, c.x);
+          const oy = Math.min(a.y + a.h, c.y + c.h) - Math.max(a.y, c.y);
+          if (ox <= 0 || oy <= 0) continue;
+          const ia = a.grab ? 0 : 1 / a.m, ic = c.grab ? 0 : 1 / c.m, sum = ia + ic || 1;
+          if (ox < oy) {
+            const dir = (a.x + a.w / 2) < (c.x + c.w / 2) ? -1 : 1;
+            a.x += dir * ox * (ia / sum); c.x -= dir * ox * (ic / sum);
+            const rv = a.vx - c.vx; if (rv * dir < 0) { const imp = -(1 + 0.1) * rv / sum; a.vx += imp * ia; c.vx -= imp * ic; }
+          } else {
+            const dir = (a.y + a.h / 2) < (c.y + c.h / 2) ? -1 : 1;
+            a.y += dir * oy * (ia / sum); c.y -= dir * oy * (ic / sum);
+            const rv = a.vy - c.vy; if (rv * dir < 0) { const imp = -(1 + 0.05) * rv / sum; a.vy += imp * ia; c.vy -= imp * ic; }
+            // 上に乗ったものは摩擦で止まる
+            if (dir < 0) { a.vx *= 0.9; } else { c.vx *= 0.9; }
+          }
+        }
+      }
+    }
+    let total = 0;
+    for (const b of bodies) {
+      b.el.style.transform = `translate(${b.x}px, ${b.y}px) rotate(${b.tilt}deg)`;
+      if (b.y + b.h >= floorY() - 2 || bodies.some(o => o !== b && o.y >= b.y + b.h - 4 && o.x < b.x + b.w && o.x + o.w > b.x)) total += b.m;
+    }
+    kgEl.textContent = total.toFixed(1);
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+
+  // 入力：空白クリックで落とす／言葉を掴んで投げる
+  let held = null, px = 0, py = 0, pt = 0, offx = 0, offy = 0, hist = [];
+  addEventListener('pointerdown', (e) => {
+    if (e.target.closest('button')) return;
+    const el = e.target.closest('.word');
+    if (el) {
+      held = bodies.find(b => b.el === el); held.grab = true; held.el.classList.add('grab');
+      offx = e.clientX - held.x; offy = e.clientY - held.y; hist = [];
+    } else {
+      spawn(e.clientX, undefined);
+    }
+    px = e.clientX; py = e.clientY; pt = performance.now();
+  });
+  addEventListener('pointermove', (e) => {
+    if (!held) return;
+    held.x = e.clientX - offx; held.y = e.clientY - offy;
+    hist.push([e.clientX, e.clientY, performance.now()]); if (hist.length > 6) hist.shift();
+  });
+  const release = () => {
+    if (!held) return;
+    if (hist.length >= 2) {
+      const [x0, y0, t0] = hist[0], [x1, y1, t1] = hist[hist.length - 1];
+      const dt = Math.max(0.016, (t1 - t0) / 1000);
+      held.vx = (x1 - x0) / dt * 0.9; held.vy = (y1 - y0) / dt * 0.9;
+    }
+    held.grab = false; held.el.classList.remove('grab'); held = null;
+  };
+  addEventListener('pointerup', release); addEventListener('pointercancel', release);
+
+  document.getElementById('shake').addEventListener('click', () => {
+    bodies.forEach(b => { b.vy -= 700 + Math.random() * 900; b.vx += (Math.random() - .5) * 900; });
+  });
+  document.getElementById('clear').addEventListener('click', () => {
+    bodies.forEach(b => b.el.remove()); bodies.length = 0;
+  });
+
+  // 最初に三つ落としておく
+  setTimeout(() => spawn(W_ * 0.5), 300);
+  setTimeout(() => spawn(W_ * 0.35), 900);
+  setTimeout(() => spawn(W_ * 0.62), 1500);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>京の朝、五つの音</title>
+<meta name="description" content="夜明けの京都で耳を澄ませて拾った五つの音を、縦書きの巻物として綴る。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700&family=Zen+Old+Mincho:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f2ede2;
+    --paper-deep: #e6dfcf;
+    --sumi: #1b1916;
+    --sumi-soft: #4a4640;
+    --shu: #b8302c;
+    --gold: #a58a49;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--paper);
+    color: var(--sumi);
+    font-family: "Shippori Mincho", "Zen Old Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+    overflow: hidden;
+    position: relative;
+  }
+  /* 和紙の繊維感 */
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.2 0 0 0 0 0.17 0 0 0 0 0.12 0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 5;
+    mix-blend-mode: multiply;
+  }
+  /* 夜明けの光が左端から差す */
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse 60% 120% at 0% 40%, rgba(255, 214, 170, 0.55), transparent 60%);
+    pointer-events: none;
+    z-index: 1;
+    animation: dawn 14s ease-in-out infinite alternate;
+  }
+  @keyframes dawn {
+    from { opacity: 0.35; }
+    to { opacity: 1; }
+  }
+
+  .scroll {
+    position: absolute; inset: 0;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    z-index: 2;
+  }
+  .scroll::-webkit-scrollbar { display: none; }
+
+  section {
+    flex: 0 0 auto;
+    height: 100vh;
+    scroll-snap-align: start;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    padding: 9vh 6vw;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3.2rem;
+    position: relative;
+  }
+  section + section::after {
+    content: "";
+    position: absolute; top: 12vh; bottom: 12vh; right: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--sumi-soft) 30%, var(--sumi-soft) 70%, transparent);
+    opacity: 0.35;
+  }
+
+  .cover { width: 100vw; justify-content: center; align-items: center; gap: 6rem; }
+  .cover h1 {
+    font-size: clamp(3.4rem, 9vh, 7rem);
+    font-weight: 500;
+    letter-spacing: 0.35em;
+    line-height: 1.1;
+    font-feature-settings: "vpal";
+  }
+  .cover h1 em { font-style: normal; color: var(--shu); }
+  .cover .sub {
+    font-size: 1.05rem;
+    letter-spacing: 0.4em;
+    color: var(--sumi-soft);
+  }
+  .cover .hint {
+    position: absolute; left: 4vw; bottom: 5vh;
+    writing-mode: horizontal-tb;
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    color: var(--sumi-soft);
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .cover .hint::before {
+    content: ""; width: 60px; height: 1px; background: var(--sumi-soft);
+    animation: slide 2.2s ease-in-out infinite;
+  }
+  @keyframes slide { 0%,100%{transform:translateX(0);opacity:.3} 50%{transform:translateX(-12px);opacity:1} }
+
+  .num {
+    font-size: 0.85rem;
+    letter-spacing: 0.5em;
+    color: var(--shu);
+    align-self: flex-start;
+  }
+  h2 {
+    font-size: clamp(2.2rem, 6.5vh, 4rem);
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    line-height: 1.15;
+  }
+  h2 small {
+    display: block;
+    font-size: 0.8rem;
+    letter-spacing: 0.4em;
+    color: var(--sumi-soft);
+    margin-top: 1.4rem;
+    font-weight: 400;
+  }
+  p {
+    font-size: clamp(1rem, 2.2vh, 1.22rem);
+    line-height: 2.35;
+    letter-spacing: 0.12em;
+    max-height: 78vh;
+    text-align: justify;
+    hanging-punctuation: allow-end;
+  }
+  p + p { margin-right: 0.4rem; }
+  .time {
+    font-size: 0.82rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    align-self: flex-end;
+    padding-top: 2rem;
+  }
+
+  /* 墨の一筆 */
+  .stroke {
+    position: absolute;
+    left: 2vw; bottom: 4vh;
+    width: 22vh; height: 22vh;
+    opacity: 0.22;
+    pointer-events: none;
+  }
+  .stroke path {
+    fill: none;
+    stroke: var(--sumi);
+    stroke-width: 9;
+    stroke-linecap: round;
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    opacity: 0.85;
+  }
+  section.on .stroke path { animation: draw 1.6s cubic-bezier(.4,0,.2,1) forwards; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  /* 落款 */
+  .seal {
+    position: absolute;
+    left: 6vw; top: 9vh;
+    width: 3.2rem; height: 3.2rem;
+    border: 2px solid var(--shu);
+    color: var(--shu);
+    display: grid; place-items: center;
+    writing-mode: vertical-rl;
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    transform: rotate(-3deg);
+    opacity: 0.9;
+    background: rgba(184,48,44,0.05);
+  }
+  .seal::after {
+    content: "";
+    position: absolute; inset: 3px;
+    border: 1px solid var(--shu);
+    opacity: 0.5;
+  }
+
+  .colophon { width: 60vw; justify-content: center; align-items: center; gap: 4rem; }
+  .colophon p { font-size: 0.95rem; color: var(--sumi-soft); line-height: 2.6; }
+  .colophon .big { font-size: 1.5rem; color: var(--sumi); letter-spacing: 0.4em; }
+
+  /* 進行の目安：上部の細い糸 */
+  .thread {
+    position: fixed; top: 0; right: 0;
+    height: 2px; background: var(--shu);
+    width: 0; z-index: 6;
+    transition: width .15s linear;
+  }
+
+  @media (max-width: 720px) {
+    section { padding: 7vh 8vw; gap: 2rem; }
+    .cover h1 { font-size: 3.2rem; }
+    .stroke { display: none; }
+    .colophon { width: 100vw; }
+  }
+</style>
+</head>
+<body>
+
+<div class="thread" id="thread"></div>
+
+<main class="scroll" id="scroll">
+<section class="colophon">
+    <p class="big">跋</p>
+    <p>音は残らない。書き留めなければ、それは今朝限りのものになる。だがそれでいい。明日の朝も、鴨川は同じ音で流れている。</p>
+    <p>京の朝、五つの音　了</p>
+  </section>
+<section>
+    <div class="num">五</div>
+    <h2>湯気の<br>音<small>午前六時五十分</small></h2>
+    <p>最後は、喫茶店の湯気だ。錦の近くの古い店で、店主が最初の一杯を淹れる。薬缶が鳴き、湯がドリッパーに落ち、コーヒーの粉がわずかに膨らんで、しゅう、と息を吐く。</p>
+    <p>街が目を覚ますとはこういうことだと思う。誰かが火を点け、水を沸かし、最初の客のために一杯を用意する。五つの音のうち、これだけが人の手で作られた音だ。だから一番、朝らしい。</p>
+    <div class="time">陽、三条通に届く</div>
+    <svg class="stroke" viewBox="0 0 200 200"><path d="M60 170 C 60 120, 140 120, 140 70 S 80 40, 100 20"/></svg>
+  </section>
+<section>
+    <div class="num">四</div>
+    <h2>露地の<br>下駄<small>午前六時十分</small></h2>
+    <p>祇園の細い路地に、下駄の音が一つ。カラン、コロン、という言葉どおりの音が、石畳に跳ね返って二重に聞こえる。誰が歩いているのかは見えない。角を曲がって消えていく。</p>
+    <p>音だけが人の気配を運んでくる。姿を見せない方が、その人はずっと長くそこにいる気がする。</p>
+    <div class="time">打ち水、まだ</div>
+    <svg class="stroke" viewBox="0 0 200 200"><path d="M30 60 L 90 60 M50 110 L 150 110 M40 160 L 170 160"/></svg>
+  </section>
+<section>
+    <div class="num">三</div>
+    <h2>竹の<br>擦れる音<small>午前五時三十分</small></h2>
+    <p>空が群青に変わるころ、風が出る。嵯峨野まで行かなくとも、鴨川沿いの小さな竹垣で十分だ。乾いた竹が擦れ合う音は、雨のようでもあり、遠くの拍手のようでもある。</p>
+    <p>不思議なことに、この音を聞くと少し寒くなる。音に温度があるとすれば、竹の音は朝の温度をしている。</p>
+    <div class="time">風、北西より</div>
+    <svg class="stroke" viewBox="0 0 200 200"><path d="M40 180 L 60 20 M100 180 L 110 20 M150 180 L 160 30"/></svg>
+  </section>
+<section>
+    <div class="num">二</div>
+    <h2>知恩院の<br>鐘<small>午前五時</small></h2>
+    <p>東の山の方角から、低く、長い音が来る。一つ。ずいぶん間を置いて、また一つ。鐘の音は空気を震わせるというより、空気そのものが重くなって降りてくるような感触がある。腹の底に残る。</p>
+    <p>鐘が鳴り終わったあとの、余韻がすっかり消えるまでの時間を、私は毎回数えてしまう。二十秒。三十秒。音が消えたのか、自分の耳が音を作り出しているのか、境目が分からなくなる。</p>
+    <div class="time">東山、まだ黒い</div>
+    <svg class="stroke" viewBox="0 0 200 200"><path d="M100 30 C 40 30, 40 170, 100 170 S 160 30, 100 30"/></svg>
+  </section>
+<section>
+    <div class="num">一</div>
+    <h2>鴨川の<br>水音<small>午前四時十五分</small></h2>
+    <p>最初に聞こえるのは、水だ。三条大橋の下、川はまだ黒く、流れているのかどうかも分からない。けれど瀬のあたりで、石を越える水がひっきりなしに小さく砕けている。近づくと大きくなり、離れると街のざわめきに紛れる。</p>
+    <p>この音だけが、夜も昼もない。人が寝ているあいだも、王朝が変わるあいだも、同じ調子で鳴り続けてきた。京都で最も古い音は、たぶんこれだ。</p>
+    <div class="time">水温、十四度</div>
+    <svg class="stroke" viewBox="0 0 200 200"><path d="M20 100 C 50 60, 80 140, 110 100 S 170 60, 185 100"/></svg>
+  </section>
+<section>
+    <div class="num">序</div>
+    <h2>音は、<br>暗いうちに<br>始まる<small>午前三時四十分</small></h2>
+    <p>京都の朝は、目で見るより先に耳に届く。夜のあいだ、街は本当に静かで、その静けさの底に耳を沈めていると、やがて一つずつ音が浮かび上がってくる。ここに書き留めたのは、ある秋の日、鴨川のほとりで夜明けを待ちながら拾った五つの音である。</p>
+    <p>どれも取るに足らない、誰も記録しようとは思わない音だ。だがそれらは、千年のあいだ毎朝この街で繰り返されてきた。</p>
+    <div class="time">秋分の三日後</div>
+    <svg class="stroke" viewBox="0 0 200 200"><path d="M30 150 C 60 40, 120 30, 170 60 S 120 170, 60 140"/></svg>
+  </section>
+<section class="cover">
+    <div class="seal">京<br>朝</div>
+    <h1>京の朝、<br><em>五つ</em>の音</h1>
+    <div class="sub">夜が明けるまでの、六時間の聞き書き</div>
+    <div class="hint">横に流して読む</div>
+  </section>
+
+</main>
+
+<script>
+  const scroller = document.getElementById('scroll');
+  const thread = document.getElementById('thread');
+  const sections = [...document.querySelectorAll('section')];
+
+  // 縦ホイールを横スクロールに変換（右から左）
+  scroller.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      e.preventDefault();
+      scroller.scrollLeft -= e.deltaY;
+    }
+  }, { passive: false });
+
+  // 矢印キー
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') scroller.scrollBy({ left: -window.innerWidth * 0.7, behavior: 'smooth' });
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') scroller.scrollBy({ left: window.innerWidth * 0.7, behavior: 'smooth' });
+  });
+
+  // 進行の糸（右端が0、左端が100%）
+  const toStart = () => { scroller.scrollLeft = scroller.scrollWidth; };
+  toStart();
+  window.addEventListener('load', toStart);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { toStart(); updateThread(); });
+  const updateThread = () => {
+    const max = scroller.scrollWidth - scroller.clientWidth;
+    const ratio = max ? 1 - scroller.scrollLeft / max : 0;
+    thread.style.width = (ratio * 100) + '%';
+  };
+  scroller.addEventListener('scroll', updateThread, { passive: true });
+  updateThread();
+
+  // 表示された節で墨の一筆を引く
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(en => { if (en.isIntersecting) en.target.classList.add('on'); });
+  }, { root: scroller, threshold: 0.5 });
+  sections.forEach(s => io.observe(s));
+</script>
+</body>
+</html>

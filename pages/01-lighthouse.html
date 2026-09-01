@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第七灯台 守灯日誌</title>
+<meta name="description" content="回転する灯台の光が当たった場所だけ、日誌が読める。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&family=IBM+Plex+Mono:wght@300;500&display=swap" rel="stylesheet">
+<style>
+  :root { --a: 0deg; --sea: #03070d; --fog: #0b1420; --lamp: #ffe9b0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--sea);
+    color: #e9e2cf;
+    font-family: "Shippori Mincho", "Hiragino Mincho ProN", serif;
+    cursor: crosshair;
+    user-select: none;
+  }
+
+  .stage { position: fixed; inset: 0; }
+
+  /* 空と海 */
+  .sky {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 100%, #0e1a2a, transparent 70%),
+      linear-gradient(to bottom, #02050a 0%, #05101c 55%, #071523 100%);
+  }
+  .horizon {
+    position: absolute; left: 0; right: 0; top: 62%; height: 38%;
+    background: linear-gradient(to bottom, #061020, #02050a);
+    overflow: hidden;
+  }
+  .horizon::before {
+    content: ""; position: absolute; left: -50%; right: -50%; top: 0; height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255,233,176,0.25), transparent);
+  }
+  .waves { position: absolute; inset: 0; opacity: .6; }
+  .waves path { fill: none; stroke: rgba(160,190,220,0.10); stroke-width: 1; }
+  .waves path:nth-child(2) { animation: wv 9s linear infinite; }
+  .waves path:nth-child(3) { animation: wv 13s linear infinite reverse; }
+  .waves path:nth-child(4) { animation: wv 17s linear infinite; }
+  @keyframes wv { from { transform: translateX(0) } to { transform: translateX(-200px) } }
+
+  /* 灯台本体 */
+  .tower {
+    position: absolute; left: 50%; top: 62%; transform: translate(-50%, -100%);
+    width: 22px; height: 96px;
+    background: linear-gradient(to right, #2a2d33, #6a6f78 40%, #23262c);
+    border-radius: 3px 3px 0 0;
+  }
+  .tower::before {
+    content: ""; position: absolute; left: -8px; right: -8px; bottom: 0; height: 10px;
+    background: #1a1d22;
+  }
+  .lamp {
+    position: absolute; left: 50%; top: 62%; transform: translate(-50%, calc(-100% - 96px));
+    width: 30px; height: 22px;
+    background: radial-gradient(circle at 50% 50%, #fff7d6, var(--lamp) 40%, rgba(255,233,176,0) 75%);
+    border-radius: 6px;
+    box-shadow: 0 0 40px 10px rgba(255,233,176,0.55), 0 0 120px 40px rgba(255,233,176,0.18);
+    animation: flick 0.12s steps(2) infinite;
+  }
+  @keyframes flick { to { filter: brightness(1.06); } }
+
+  /* 光束 */
+  .beam {
+    position: absolute; left: 50%; top: calc(62% - 107px);
+    width: 0; height: 0;
+    --w: 20deg;
+    pointer-events: none;
+  }
+  .beam::before {
+    content: ""; position: absolute; left: -200vmax; top: -200vmax; width: 400vmax; height: 400vmax;
+    background: conic-gradient(from calc(var(--a) - var(--w) / 2),
+      rgba(255,233,176,0.00) 0deg,
+      rgba(255,233,176,0.16) calc(var(--w) * 0.25),
+      rgba(255,233,176,0.22) calc(var(--w) * 0.5),
+      rgba(255,233,176,0.16) calc(var(--w) * 0.75),
+      rgba(255,233,176,0.00) var(--w),
+      transparent 360deg);
+    mask: radial-gradient(circle, rgba(0,0,0,1) 0, rgba(0,0,0,0.9) 30%, rgba(0,0,0,0) 62%);
+    mix-blend-mode: screen;
+  }
+
+  /* 日誌の層：光が当たった箇所だけ可視 */
+  .log {
+    position: absolute; left: 50%; top: calc(62% - 107px);
+    width: 0; height: 0;
+  }
+  .log .mask {
+    position: absolute; left: -200vmax; top: -200vmax; width: 400vmax; height: 400vmax;
+    mask: conic-gradient(from calc(var(--a) - 72deg),
+      rgba(0,0,0,0) 0deg,
+      rgba(0,0,0,0.05) 18deg,
+      rgba(0,0,0,0.30) 48deg,
+      rgba(0,0,0,1) 60deg,
+      rgba(0,0,0,1) 84deg,
+      rgba(0,0,0,0) 92deg,
+      rgba(0,0,0,0) 360deg);
+    -webkit-mask: conic-gradient(from calc(var(--a) - 72deg),
+      rgba(0,0,0,0) 0deg,
+      rgba(0,0,0,0.05) 18deg,
+      rgba(0,0,0,0.30) 48deg,
+      rgba(0,0,0,1) 60deg,
+      rgba(0,0,0,1) 84deg,
+      rgba(0,0,0,0) 92deg,
+      rgba(0,0,0,0) 360deg);
+  }
+  .entry {
+    position: absolute; left: 200vmax; top: 200vmax;
+    width: 19rem;
+    transform: translate(calc(var(--x) - 50%), calc(var(--y) - 50%));
+    color: #f0e7cf;
+    text-shadow: 0 0 18px rgba(255,233,176,0.35);
+  }
+  .entry time {
+    display: block;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .68rem; letter-spacing: .22em; color: #d8b56a; margin-bottom: .55rem;
+  }
+  .entry p { font-size: .98rem; line-height: 1.95; }
+  .entry.big p { font-size: 1.35rem; line-height: 1.7; font-weight: 600; }
+  .entry.small { width: 14rem; }
+  .entry.small p { font-size: .84rem; line-height: 1.8; opacity: .9; }
+
+  /* 常時見える最小限のUI */
+  .hud {
+    position: fixed; left: 24px; bottom: 22px; z-index: 5;
+    font-family: "IBM Plex Mono", monospace; font-size: .7rem; letter-spacing: .18em;
+    color: rgba(233,226,207,0.55); line-height: 1.9;
+  }
+  .hud b { color: #d8b56a; font-weight: 500; }
+  .title {
+    position: fixed; right: 24px; top: 22px; z-index: 5; text-align: right;
+    font-size: .8rem; letter-spacing: .3em; color: rgba(233,226,207,0.5);
+  }
+  .title strong { display: block; font-size: 1.15rem; letter-spacing: .25em; color: #e9e2cf; font-weight: 600; margin-bottom: .3rem; }
+  .hint {
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 5;
+    font-family: "IBM Plex Mono", monospace; font-size: .68rem; letter-spacing: .25em;
+    color: rgba(233,226,207,0.45); white-space: nowrap;
+    transition: opacity 1s;
+  }
+  body.touched .hint { opacity: 0; }
+
+  canvas.rain { position: fixed; inset: 0; pointer-events: none; z-index: 4; opacity: .55; }
+
+  /* 霧 */
+  .fog {
+    position: absolute; inset: 0; pointer-events: none; z-index: 3;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004' numOctaves='3' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.55 0 0 0 0 0.62 0 0 0 0 0.72 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+    background-size: 1200px 1200px;
+    animation: fogmove 60s linear infinite;
+    mix-blend-mode: screen; opacity: .5;
+  }
+  @keyframes fogmove { from { background-position: 0 0 } to { background-position: 1200px 300px } }
+
+  @media (max-width: 720px) {
+    .entry { width: 15rem; }
+    .entry p { font-size: .9rem; }
+    .entry.big p { font-size: 1.15rem; }
+    .title { right: 16px; top: 14px; }
+    .hud { left: 16px; bottom: 14px; }
+    .hint { bottom: 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="sky"></div>
+  <div class="horizon">
+    <svg class="waves" viewBox="0 0 1600 400" preserveAspectRatio="none">
+      <path d="M0 40 Q 100 20 200 40 T 400 40 T 600 40 T 800 40 T 1000 40 T 1200 40 T 1400 40 T 1600 40 T 1800 40"/>
+      <path d="M0 110 Q 100 90 200 110 T 400 110 T 600 110 T 800 110 T 1000 110 T 1200 110 T 1400 110 T 1600 110 T 1800 110"/>
+      <path d="M0 200 Q 100 175 200 200 T 400 200 T 600 200 T 800 200 T 1000 200 T 1200 200 T 1400 200 T 1600 200 T 1800 200"/>
+      <path d="M0 310 Q 100 285 200 310 T 400 310 T 600 310 T 800 310 T 1000 310 T 1200 310 T 1400 310 T 1600 310 T 1800 310"/>
+    </svg>
+  </div>
+
+  <div class="log" id="log">
+    <div class="mask" id="mask"></div>
+  </div>
+
+  <div class="beam" id="beam"></div>
+  <div class="fog"></div>
+  <div class="tower"></div>
+  <div class="lamp"></div>
+</div>
+
+<canvas class="rain" id="rain"></canvas>
+
+<div class="title"><strong>第七灯台</strong>守灯日誌 一九五二年 冬</div>
+<div class="hud">
+  方位 <b id="deg">000</b>°<br>
+  回転 <b id="rpm">1</b> 周／<b>24</b> 秒<br>
+  可視 <b id="vis">0</b> ／ 12 項
+</div>
+<div class="hint">光が通り過ぎるのを待つ　　押さえると光を止められる　　左右に引くと回せる</div>
+
+<script>
+(() => {
+  // 日誌の項目：角度（0=真上、時計回り）と距離（画面短辺に対する比率）
+  const entries = [
+    { a: 350, r: .40, cls: 'big',   t: '十二月一日', p: 'この島に来て三百日。灯を消したことは一度もない。' },
+    { a: 22,  r: .60, cls: '',      t: '十二月三日 二三時', p: '北東の風、強し。沖に船影三つ。一つは動かない。明朝、双眼鏡で確かめる。' },
+    { a: 55,  r: .42, cls: 'small', t: '十二月四日', p: '動かない船は漁船だった。錨が切れて漂っていた。乗組員は無事。' },
+    { a: 84,  r: .66, cls: '',      t: '十二月九日', p: '補給船が来ない。豆は残り二週間分。塩は足りる。本は五冊目を読み終えた。' },
+    { a: 112, r: .44, cls: '',      t: '十二月十四日', p: '灯室のガラスを磨いた。指の跡ひとつで光は三海里短くなる、と前任者の手帳にある。' },
+    { a: 140, r: .62, cls: 'small', t: '十二月十七日', p: '霧。光が霧に当たって、灯台のまわりだけが明るい部屋のようになる。' },
+    { a: 172, r: .50, cls: 'big',   t: '十二月二十日', p: '誰もこの光を見ていないのだとしても、灯は回さなければならない。' },
+    { a: 205, r: .64, cls: '',      t: '十二月二十二日', p: '補給船、着く。手紙が四通。ひとつは春に書かれたものだった。' },
+    { a: 236, r: .44, cls: '',      t: '十二月二十四日', p: '夜半、鳥が灯室のガラスに当たった。小さな音だった。朝、灯台の根元に羽が一枚。' },
+    { a: 268, r: .60, cls: 'small', t: '十二月二十八日', p: '雪。海の上に降る雪は、水面に触れる前に消える。それを何時間も見ていた。' },
+    { a: 300, r: .44, cls: '',      t: '十二月三十一日', p: '今年最後の点灯。回転数を数える。二十四秒に一周。三千六百回で朝になる。' },
+    { a: 325, r: .66, cls: 'small', t: '一月一日 〇時', p: '沖で汽笛。誰かがこの光を見ている。' },
+  ];
+
+  const log = document.getElementById('log');
+  const mask = document.getElementById('mask');
+  const root = document.documentElement;
+  const vmin = () => Math.min(innerWidth, innerHeight);
+
+  entries.forEach((e, i) => {
+    const el = document.createElement('article');
+    el.className = 'entry ' + e.cls;
+    el.dataset.a = e.a;
+    el.innerHTML = `<time>${e.t}</time><p>${e.p}</p>`;
+    mask.appendChild(el);
+    e.el = el;
+  });
+
+  const layout = () => {
+    // 画面いっぱいの楕円（余白を引いた半径）に、r=.66 が外周として収まるよう配置
+    const ex = Math.max(160, innerWidth / 2 - 170), ey = Math.max(120, innerHeight / 2 - 70);
+    entries.forEach(e => {
+      const rad = (e.a - 90) * Math.PI / 180;
+      const x = Math.cos(rad) * (e.r / 0.66) * ex;
+      const y = Math.sin(rad) * (e.r / 0.66) * ey;
+      e.el.style.setProperty('--x', x + 'px');
+      e.el.style.setProperty('--y', y + 'px');
+    });
+  };
+  layout(); addEventListener('resize', layout);
+
+  // 回転
+  let angle = 0, vel = 360 / 24, held = false, dragging = false, lastX = 0, lastT = performance.now();
+  const seen = new Set();
+  const degEl = document.getElementById('deg'), visEl = document.getElementById('vis'), rpmEl = document.getElementById('rpm');
+
+  const frame = (now) => {
+    const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
+    if (!held && !dragging) {
+      // 手で回した後はゆっくり基準速度へ戻る
+      vel += (360 / 24 - vel) * 0.02;
+      angle += vel * dt;
+    }
+    angle = ((angle % 360) + 360) % 360;
+    root.style.setProperty('--a', angle + 'deg');
+    degEl.textContent = String(Math.round(angle)).padStart(3, '0');
+    entries.forEach(e => {
+      const d = Math.abs(((angle - e.a + 540) % 360) - 180);
+      if (d < 12) seen.add(e.a);
+    });
+    visEl.textContent = seen.size;
+    rpmEl.textContent = (Math.abs(vel) / 15).toFixed(1);
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+
+  // 押さえる＝止める／左右に引く＝回す
+  const stage = document.querySelector('.stage');
+  addEventListener('pointerdown', (e) => {
+    document.body.classList.add('touched');
+    held = true; dragging = false; lastX = e.clientX;
+  });
+  addEventListener('pointermove', (e) => {
+    if (!held) return;
+    const dx = e.clientX - lastX;
+    if (Math.abs(dx) > 1) { dragging = true; angle += dx * 0.35; vel = dx * 12; lastX = e.clientX; }
+  });
+  addEventListener('pointerup', () => { held = false; dragging = false; });
+  addEventListener('pointercancel', () => { held = false; dragging = false; });
+
+  // 雨
+  const cv = document.getElementById('rain'), ctx = cv.getContext('2d');
+  let W, H, drops = [];
+  const rs = () => { W = cv.width = innerWidth; H = cv.height = innerHeight; };
+  rs(); addEventListener('resize', rs);
+  for (let i = 0; i < 180; i++) drops.push({ x: Math.random() * 2000, y: Math.random() * 1200, l: 8 + Math.random() * 16, s: 7 + Math.random() * 9 });
+  const rain = () => {
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(190,205,225,0.28)'; ctx.lineWidth = 1;
+    ctx.beginPath();
+    drops.forEach(d => {
+      d.y += d.s; d.x -= d.s * 0.18;
+      if (d.y > H) { d.y = -20; d.x = Math.random() * (W + 300); }
+      ctx.moveTo(d.x, d.y); ctx.lineTo(d.x - d.l * 0.18, d.y - d.l);
+    });
+    ctx.stroke();
+    requestAnimationFrame(rain);
+  };
+  rain();
+})();
+</script>
+</body>
+</html>
