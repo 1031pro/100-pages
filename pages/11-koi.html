@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>錦鯉の池</title>
+<meta name="description" content="上から見下ろす池。光の模様が揺れ、錦鯉が背骨をしならせて泳ぐ。クリックで餌をまく。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=IBM+Plex+Mono:wght@300;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: #0b2a2e; }
+  body { font-family: "Shippori Mincho", serif; color: #eef3ec; user-select: none; -webkit-user-select: none; touch-action: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+  .hud { position: fixed; inset: 0; pointer-events: none; }
+  .hud > * { position: absolute; }
+  .t { left: 26px; top: 22px; }
+  .t h1 { font-size: 26px; letter-spacing: .4em; font-weight: 700; text-shadow: 0 2px 16px rgba(0,0,0,.5); }
+  .t p { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .28em; color: rgba(238,243,236,.65); margin-top: 6px; }
+  .n { right: 26px; top: 22px; text-align: right; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .22em; color: rgba(238,243,236,.65); line-height: 1.9; }
+  .n b { color: #fff; font-weight: 500; }
+  .legend { left: 26px; bottom: 26px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .legend span { font-size: 12px; letter-spacing: .15em; display: flex; align-items: center; gap: 7px; color: rgba(238,243,236,.85); }
+  .legend i { width: 22px; height: 10px; border-radius: 5px; display: inline-block; }
+  .hint { right: 26px; bottom: 26px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .25em; color: rgba(238,243,236,.55); text-align: right; line-height: 1.9; }
+  @media (max-width: 720px) { .hint { display: none; } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hud">
+  <div class="t"><h1>錦鯉の池</h1><p>NISHIKIGOI POND · SPINE-CHAIN FISH · CAUSTICS</p></div>
+  <div class="n">鯉 <b id="nf">0</b> 尾<br>水温 <b id="temp">21.4</b> ℃<br>餌 <b id="food">0</b> 粒</div>
+  <div class="legend" id="legend"></div>
+  <div class="hint">クリック＝餌をまく　　鯉が寄ってくる<br>動かすと水面が揺れる</div>
+</div>
+
+<script>
+(() => {
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  let W, H, dpr;
+  const resize = () => { dpr = Math.min(1.5, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); makeFloor(); };
+
+  // ---------- 品種 ----------
+  const breeds = [
+    { name: '紅白', base: '#f6f1e6', marks: ['#d63b2f'], n: 2 },
+    { name: '大正三色', base: '#f4efe4', marks: ['#d63b2f', '#1a1a1a'], n: 2 },
+    { name: '黄金', base: '#e7b93c', marks: [], n: 1, metallic: true },
+    { name: '昭和三色', base: '#1c1c1c', marks: ['#d63b2f', '#f3eee2'], n: 1 },
+    { name: '浅黄', base: '#7f9fb5', marks: ['#e57a4c'], n: 1, scale: true },
+    { name: '白写り', base: '#f4efe4', marks: ['#1a1a1a'], n: 1 },
+  ];
+  const legend = document.getElementById('legend');
+  breeds.forEach(b => { const s = document.createElement('span'); s.innerHTML = `<i style="background:linear-gradient(90deg, ${b.base} 40%, ${b.marks[0] || b.base} 40% 70%, ${b.base} 70%)"></i>${b.name}`; legend.appendChild(s); });
+
+  // ---------- 鯉 ----------
+  const SEG = 14;
+  const fishes = [];
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const mkFish = (breed) => {
+    const len = rnd(120, 175);
+    const f = { breed, len, x: rnd(100, innerWidth - 100), y: rnd(100, innerHeight - 100), a: rnd(0, 6.28), v: rnd(0.6, 1.1), turn: 0, phase: rnd(0, 6.28), spine: [], target: null, wander: rnd(0, 6.28), depth: rnd(0, 1), marks: [] };
+    for (let i = 0; i < SEG; i++) f.spine.push({ x: f.x - Math.cos(f.a) * i * (len / SEG), y: f.y - Math.sin(f.a) * i * (len / SEG) });
+    // 模様：背骨に沿った位置と幅（0..1）
+    const nm = breed.marks.length ? Math.floor(rnd(2, 5)) : 0;
+    for (let i = 0; i < nm; i++) f.marks.push({ t: rnd(0.05, 0.85), w: rnd(0.12, 0.3), side: rnd(-0.5, 0.5), color: breed.marks[Math.floor(Math.random() * breed.marks.length)], r: rnd(0.6, 1.1) });
+    return f;
+  };
+  breeds.forEach(b => { for (let i = 0; i < b.n; i++) fishes.push(mkFish(b)); });
+  document.getElementById('nf').textContent = fishes.length;
+
+  // ---------- 池の底（一度だけ） ----------
+  const floor = document.createElement('canvas'), fctx = floor.getContext('2d');
+  const stones = [], pads = [];
+  const makeFloor = () => {
+    floor.width = W; floor.height = H;
+    const g = fctx.createRadialGradient(W * .5, H * .5, 10, W * .5, H * .5, Math.max(W, H) * .75);
+    g.addColorStop(0, '#1d5a5c'); g.addColorStop(0.6, '#123c42'); g.addColorStop(1, '#081c22');
+    fctx.fillStyle = g; fctx.fillRect(0, 0, W, H);
+    // 砂利
+    for (let i = 0; i < 2600; i++) { fctx.fillStyle = `rgba(${120 + Math.random() * 60 | 0},${130 + Math.random() * 50 | 0},${110 + Math.random() * 40 | 0},${.08 + Math.random() * .12})`; fctx.beginPath(); fctx.ellipse(Math.random() * W, Math.random() * H, rnd(1, 3.5), rnd(1, 2.5), Math.random() * 3, 0, 6.28); fctx.fill(); }
+    // 石
+    stones.length = 0;
+    for (let i = 0; i < 9; i++) stones.push({ x: rnd(0.05, 0.95) * W, y: rnd(0.05, 0.95) * H, r: rnd(22, 60), rot: Math.random() * 3, e: rnd(0.6, 1) });
+    stones.forEach(s => { fctx.save(); fctx.translate(s.x, s.y); fctx.rotate(s.rot); const sg = fctx.createRadialGradient(-s.r * .3, -s.r * .3, 2, 0, 0, s.r); sg.addColorStop(0, '#6f7a74'); sg.addColorStop(1, '#2e3a38'); fctx.fillStyle = 'rgba(0,0,0,.35)'; fctx.beginPath(); fctx.ellipse(6, 8, s.r, s.r * s.e, 0, 0, 6.28); fctx.fill(); fctx.fillStyle = sg; fctx.beginPath(); fctx.ellipse(0, 0, s.r, s.r * s.e, 0, 0, 6.28); fctx.fill(); fctx.restore(); });
+    // 睡蓮の葉（水面）
+    pads.length = 0;
+    for (let i = 0; i < 7; i++) pads.push({ x: rnd(0.05, 0.95) * W, y: rnd(0.05, 0.95) * H, r: rnd(28, 58), rot: Math.random() * 6.28, ph: Math.random() * 6.28, flower: Math.random() < 0.35 });
+  };
+
+  // ---------- 水面の波紋 ----------
+  const ripples = [];
+  const foods = [];
+  const addRipple = (x, y, s = 1) => ripples.push({ x, y, r: 4, a: 0.5 * s, s });
+
+  // ---------- 描画 ----------
+  const drawCaustics = (t) => {
+    // 三層の正弦を重ねた光の網
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    const cell = 46;
+    for (let y = -cell; y < H + cell; y += cell) for (let x = -cell; x < W + cell; x += cell) {
+      const px = x + Math.sin(y * 0.05 + t * 0.9) * 14 + Math.sin(x * 0.03 + t * 0.5) * 10;
+      const py = y + Math.cos(x * 0.05 - t * 0.7) * 14 + Math.cos(y * 0.03 + t * 0.6) * 10;
+      const v = (Math.sin((px + py) * 0.045 + t * 1.3) + Math.sin((px - py * 1.3) * 0.05 - t * 0.9)) * 0.5;
+      if (v < 0.3) continue;
+      const a = (v - 0.3) * 0.5;
+      ctx.strokeStyle = `rgba(200,240,230,${a})`; ctx.lineWidth = 1.4 + v * 2;
+      ctx.beginPath(); ctx.moveTo(px - cell * .6, py + Math.sin(px) * 8); ctx.quadraticCurveTo(px, py - 12 * v, px + cell * .6, py + Math.cos(py) * 8); ctx.stroke();
+    }
+    ctx.restore();
+  };
+
+  const drawFish = (f, shadow) => {
+    const sp = f.spine, n = sp.length;
+    // 幅の輪郭：頭は丸く、腹で最大、尾に向かって細く
+    const wAt = (i) => { const t = i / (n - 1); return f.len * 0.14 * (t < 0.18 ? 0.55 + t / 0.18 * 0.45 : Math.pow(1 - (t - 0.18) / 0.82, 0.8) * 0.85 + 0.2); };
+    const left = [], right = [];
+    for (let i = 0; i < n; i++) {
+      const p = sp[i], q = sp[Math.min(n - 1, i + 1)], r = sp[Math.max(0, i - 1)];
+      const ang = Math.atan2(q.y - r.y, q.x - r.x), w = wAt(i);
+      left.push([p.x + Math.cos(ang + 1.5708) * w, p.y + Math.sin(ang + 1.5708) * w]);
+      right.push([p.x + Math.cos(ang - 1.5708) * w, p.y + Math.sin(ang - 1.5708) * w]);
+    }
+    const body = () => { ctx.beginPath(); ctx.moveTo(sp[0].x + (sp[0].x - sp[1].x) * 0.35, sp[0].y + (sp[0].y - sp[1].y) * 0.35); left.forEach(([x, y]) => ctx.lineTo(x, y)); right.slice().reverse().forEach(([x, y]) => ctx.lineTo(x, y)); ctx.closePath(); };
+    if (shadow) { ctx.save(); ctx.translate(14 + f.depth * 10, 18 + f.depth * 12); ctx.fillStyle = `rgba(0,10,12,${0.25 + f.depth * 0.15})`; ctx.filter = 'blur(4px)'; body(); ctx.fill(); ctx.restore(); return; }
+    // 尾びれ
+    const tail = sp[n - 1], pt = sp[n - 3]; const ta = Math.atan2(tail.y - pt.y, tail.x - pt.x); const tl = f.len * 0.26, flap = Math.sin(f.phase * 1.0) * 0.35;
+    ctx.fillStyle = f.breed.base; ctx.globalAlpha = 0.85;
+    ctx.beginPath(); ctx.moveTo(tail.x, tail.y); ctx.quadraticCurveTo(tail.x + Math.cos(ta + 0.9 + flap) * tl * 0.7, tail.y + Math.sin(ta + 0.9 + flap) * tl * 0.7, tail.x + Math.cos(ta + 0.55 + flap) * tl, tail.y + Math.sin(ta + 0.55 + flap) * tl); ctx.quadraticCurveTo(tail.x + Math.cos(ta + flap * .5) * tl * .55, tail.y + Math.sin(ta + flap * .5) * tl * .55, tail.x + Math.cos(ta - 0.55 + flap) * tl, tail.y + Math.sin(ta - 0.55 + flap) * tl); ctx.quadraticCurveTo(tail.x + Math.cos(ta - 0.9 + flap) * tl * 0.7, tail.y + Math.sin(ta - 0.9 + flap) * tl * 0.7, tail.x, tail.y); ctx.fill();
+    // 胸びれ
+    const pi = 3, pp = sp[pi], pa = Math.atan2(sp[pi + 1].y - sp[pi - 1].y, sp[pi + 1].x - sp[pi - 1].x), fl = f.len * 0.16, fw = Math.sin(f.phase * 0.8) * 0.25;
+    [1, -1].forEach(sg => { const a0 = pa + sg * (2.0 + fw); ctx.beginPath(); ctx.moveTo(pp.x, pp.y); ctx.quadraticCurveTo(pp.x + Math.cos(a0 + sg * .4) * fl, pp.y + Math.sin(a0 + sg * .4) * fl, pp.x + Math.cos(a0 - sg * .2) * fl * 1.1, pp.y + Math.sin(a0 - sg * .2) * fl * 1.1); ctx.quadraticCurveTo(pp.x + Math.cos(a0 - sg * .6) * fl * .6, pp.y + Math.sin(a0 - sg * .6) * fl * .6, pp.x, pp.y); ctx.fill(); });
+    ctx.globalAlpha = 1;
+    // 体
+    ctx.save(); body(); ctx.clip();
+    const g = ctx.createLinearGradient(sp[0].x, sp[0].y, tail.x, tail.y); g.addColorStop(0, f.breed.base); g.addColorStop(1, f.breed.base);
+    ctx.fillStyle = f.breed.base; ctx.fillRect(0, 0, W, H);
+    // 模様
+    f.marks.forEach(m => { const i = Math.round(m.t * (n - 1)); const p = sp[i]; const w = wAt(i); ctx.fillStyle = m.color; ctx.beginPath(); ctx.ellipse(p.x + m.side * w * 0.6, p.y + m.side * w * 0.6, f.len * m.w * 0.9, w * m.r * 1.2, Math.atan2(sp[Math.min(n - 1, i + 1)].y - p.y, sp[Math.min(n - 1, i + 1)].x - p.x), 0, 6.28); ctx.fill(); });
+    // 鱗
+    if (f.breed.scale || f.breed.metallic) { ctx.strokeStyle = f.breed.metallic ? 'rgba(255,255,255,.22)' : 'rgba(20,40,60,.25)'; ctx.lineWidth = 1; for (let i = 2; i < n - 1; i++) { const p = sp[i], w = wAt(i); for (let k = -2; k <= 2; k++) { ctx.beginPath(); ctx.arc(p.x + k * w * 0.4, p.y + (i % 2) * 3, w * 0.28, 0, 6.28); ctx.stroke(); } } }
+    // 背中のハイライトと腹の陰
+    const hl = ctx.createLinearGradient(sp[0].x, sp[0].y - 20, sp[0].x, sp[0].y + 20); ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.beginPath(); for (let i = 0; i < n; i++) { const p = sp[i], w = wAt(i) * 0.35; if (i === 0) ctx.moveTo(p.x, p.y - w); else ctx.lineTo(p.x, p.y - w); } for (let i = n - 1; i >= 0; i--) { const p = sp[i], w = wAt(i) * 0.35; ctx.lineTo(p.x, p.y + w); } ctx.closePath(); ctx.fill();
+    ctx.restore();
+    // 輪郭と目
+    ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = 1; body(); ctx.stroke();
+    const ha = Math.atan2(sp[1].y - sp[0].y, sp[1].x - sp[0].x); const ew = wAt(1) * 0.55;
+    [1, -1].forEach(sg => { ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(sp[1].x + Math.cos(ha + sg * 1.5708) * ew, sp[1].y + Math.sin(ha + sg * 1.5708) * ew, 2.2, 0, 6.28); ctx.fill(); });
+  };
+
+  // ---------- 更新 ----------
+  const update = (f, dt) => {
+    // 目標：餌 → 最も近い餌へ。なければ徘徊
+    let tx, ty, speed = f.v;
+    let nearest = null, nd = 1e9;
+    foods.forEach(fd => { const d = Math.hypot(fd.x - f.x, fd.y - f.y); if (d < nd) { nd = d; nearest = fd; } });
+    if (nearest && nd < 520) { tx = nearest.x; ty = nearest.y; speed = f.v * 2.1; if (nd < 14) { nearest.eaten = true; addRipple(nearest.x, nearest.y, 0.7); } }
+    else { f.wander += (Math.random() - .5) * 0.25 * dt; tx = f.x + Math.cos(f.wander) * 200; ty = f.y + Math.sin(f.wander) * 200; }
+    // 壁を避ける
+    const m = 90; if (f.x < m) tx = f.x + 300; if (f.x > W - m) tx = f.x - 300; if (f.y < m) ty = f.y + 300; if (f.y > H - m) ty = f.y - 300;
+    // 石を避ける
+    stones.forEach(s => { const d = Math.hypot(s.x - f.x, s.y - f.y); if (d < s.r + 50) { tx += (f.x - s.x) * 3; ty += (f.y - s.y) * 3; } });
+    // 他の鯉と離れる
+    fishes.forEach(o => { if (o === f) return; const d = Math.hypot(o.x - f.x, o.y - f.y); if (d < 70) { tx += (f.x - o.x) * 2; ty += (f.y - o.y) * 2; } });
+    const want = Math.atan2(ty - f.y, tx - f.x);
+    let da = want - f.a; da = Math.atan2(Math.sin(da), Math.cos(da));
+    f.turn += (da * 0.06 - f.turn) * 0.15; f.turn = Math.max(-0.05, Math.min(0.05, f.turn));
+    f.a += f.turn * dt;
+    f.x += Math.cos(f.a) * speed * dt; f.y += Math.sin(f.a) * speed * dt;
+    f.phase += (0.12 + speed * 0.06) * dt;
+    // 背骨：頭に追従（各節が前の節との距離を保つ）＋ 泳ぎのうねり
+    const segLen = f.len / SEG;
+    f.spine[0].x = f.x; f.spine[0].y = f.y;
+    for (let i = 1; i < SEG; i++) {
+      const p = f.spine[i], q = f.spine[i - 1];
+      let ang = Math.atan2(p.y - q.y, p.x - q.x);
+      const wave = Math.sin(f.phase - i * 0.45) * 0.09 * (i / SEG) * (0.6 + speed * 0.5);
+      ang += wave;
+      p.x = q.x + Math.cos(ang) * segLen; p.y = q.y + Math.sin(ang) * segLen;
+    }
+    f.depth += (Math.sin(f.phase * 0.05) * 0.5 + 0.5 - f.depth) * 0.01;
+  };
+
+  let t = 0, last = performance.now(), mx = -1, my = -1, mt = 0;
+  const step = (now) => {
+    const dt = Math.min(2, (now - last) / 16.67); last = now; t += dt / 60;
+    ctx.drawImage(floor, 0, 0, W, H);
+    drawCaustics(t);
+    // 影 → 餌 → 鯉
+    fishes.forEach(f => update(f, dt));
+    fishes.sort((a, b) => a.depth - b.depth);
+    fishes.forEach(f => drawFish(f, true));
+    for (let i = foods.length - 1; i >= 0; i--) { const fd = foods[i]; fd.life -= dt; if (fd.eaten || fd.life <= 0) { foods.splice(i, 1); continue; } fd.x += Math.sin(t * 2 + fd.ph) * 0.15; ctx.fillStyle = '#d9b36a'; ctx.beginPath(); ctx.arc(fd.x, fd.y, 2.4, 0, 6.28); ctx.fill(); }
+    document.getElementById('food').textContent = foods.length;
+    fishes.forEach(f => drawFish(f, false));
+    // 水面：睡蓮、波紋、光の反射
+    pads.forEach(p => { const bob = Math.sin(t * 1.2 + p.ph) * 2; ctx.save(); ctx.translate(p.x + bob, p.y); ctx.rotate(p.rot); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.arc(5, 7, p.r, 0.35, 6.28 - 0.35); ctx.lineTo(5, 7); ctx.fill(); const pg = ctx.createRadialGradient(-p.r * .3, -p.r * .3, 4, 0, 0, p.r); pg.addColorStop(0, '#6da35a'); pg.addColorStop(1, '#2f6a3a'); ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(0, 0, p.r, 0.35, 6.28 - 0.35); ctx.lineTo(0, 0); ctx.closePath(); ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1; for (let k = 0; k < 7; k++) { const a = 0.35 + k * (6.28 - 0.7) / 6; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(a) * p.r * .95, Math.sin(a) * p.r * .95); ctx.stroke(); } if (p.flower) { for (let k = 0; k < 8; k++) { ctx.fillStyle = k % 2 ? '#f7c6d2' : '#fbe3ea'; ctx.beginPath(); ctx.ellipse(Math.cos(k * 0.785) * 8, Math.sin(k * 0.785) * 8, 9, 4, k * 0.785, 0, 6.28); ctx.fill(); } ctx.fillStyle = '#f2d16b'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, 6.28); ctx.fill(); } ctx.restore(); });
+    for (let i = ripples.length - 1; i >= 0; i--) { const r = ripples[i]; r.r += (1.6 + r.s) * dt; r.a -= 0.008 * dt; if (r.a <= 0) { ripples.splice(i, 1); continue; } ctx.strokeStyle = `rgba(230,250,245,${r.a})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, 6.28); ctx.stroke(); ctx.strokeStyle = `rgba(230,250,245,${r.a * .5})`; ctx.beginPath(); ctx.arc(r.x, r.y, r.r * .7, 0, 6.28); ctx.stroke(); }
+    // 空の映り込み（薄い青のグラデ）
+    const sg = ctx.createLinearGradient(0, 0, W, H); sg.addColorStop(0, 'rgba(180,220,235,.10)'); sg.addColorStop(0.5, 'rgba(180,220,235,0)'); sg.addColorStop(1, 'rgba(120,180,200,.08)'); ctx.fillStyle = sg; ctx.fillRect(0, 0, W, H);
+    // 鯉が水面近くを通ると小さな波紋
+    if (Math.random() < 0.04 * dt) { const f = fishes[Math.floor(Math.random() * fishes.length)]; if (f.depth > 0.75) addRipple(f.x, f.y, 0.4); }
+    requestAnimationFrame(step);
+  };
+
+  cv.addEventListener('pointerdown', (e) => { for (let i = 0; i < 6; i++) foods.push({ x: e.clientX + rnd(-24, 24), y: e.clientY + rnd(-24, 24), life: 900, ph: Math.random() * 6.28 }); addRipple(e.clientX, e.clientY, 1); });
+  cv.addEventListener('pointermove', (e) => { if (performance.now() - mt > 120) { mt = performance.now(); addRipple(e.clientX, e.clientY, 0.25); } });
+
+  resize(); addEventListener('resize', resize);
+  requestAnimationFrame(step);
+})();
+</script>
+</body>
+</html>

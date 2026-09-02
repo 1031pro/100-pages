@@ -3,91 +3,142 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>100 Pages</title>
-<meta name="description" content="1ページ1コンセプトで作る、100枚のウェブページ。すべて日本語で読める。">
+<title>Fable 5.1 · 100 Pages（日本語）</title>
+<meta name="description" content="Claude Fable 5.1 が1ページずつ作る、自己完結の視覚作品100本。すべて日本語で読める。各作品の生成プロンプト付き。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;500;800&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #0c0c0e; --fg: #f2f2f0; --mute: #8b8b90; --line: rgba(255,255,255,0.10); }
+  :root { --bg: #f7f5f0; --fg: #17171a; --mute: #6b6b73; --line: #e2dfd7; --card: #ffffff; --acc1: #6a4cff; --acc2: #1fb6a8; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg); color: var(--fg);
-    font-family: "Noto Sans JP", "Inter", sans-serif;
-    min-height: 100vh; -webkit-font-smoothing: antialiased;
-  }
-  header { padding: clamp(40px, 8vw, 96px) clamp(20px, 5vw, 64px) 32px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; }
-  h1 { font-family: Inter, sans-serif; font-weight: 800; font-size: clamp(56px, 12vw, 160px); letter-spacing: -0.06em; line-height: .9; }
-  h1 span { display: block; font-family: "Noto Sans JP", sans-serif; font-weight: 300; font-size: clamp(14px, 1.6vw, 20px); letter-spacing: .3em; margin-top: 18px; color: var(--mute); }
-  .count { font-family: Inter, sans-serif; font-size: clamp(14px, 1.4vw, 18px); color: var(--mute); }
-  .count b { color: var(--fg); font-size: 2.4em; font-weight: 800; letter-spacing: -0.04em; margin-right: 6px; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--fg); font-family: "Noto Sans JP", "Inter", sans-serif; -webkit-font-smoothing: antialiased; }
+  body::before { content: ""; position: fixed; inset: 0; z-index: -1; background: radial-gradient(ellipse 60% 40% at 90% 0%, rgba(106,76,255,.10), transparent 60%), radial-gradient(ellipse 50% 40% at 0% 100%, rgba(31,182,168,.10), transparent 60%); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+  header { padding: 56px 0 26px; }
+  .kicker { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .3em; color: var(--acc1); }
+  h1 { font-family: Inter, "Noto Sans JP", sans-serif; font-weight: 900; font-size: clamp(34px, 5vw, 54px); letter-spacing: -0.03em; margin-top: 10px; line-height: 1.05; }
+  h1 span { background: linear-gradient(90deg, var(--acc1), var(--acc2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { max-width: 640px; color: var(--mute); font-size: 15px; line-height: 1.85; margin-top: 16px; }
+  .tools { display: flex; gap: 14px; align-items: center; margin-top: 26px; }
+  .search { flex: 1; display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
+  .search input { flex: 1; border: 0; outline: 0; font: inherit; font-size: 14px; background: transparent; color: var(--fg); }
+  .search svg { width: 16px; height: 16px; stroke: var(--mute); fill: none; stroke-width: 2; }
+  .count { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .2em; color: var(--mute); white-space: nowrap; }
+  .count b { color: var(--acc1); font-size: 14px; }
 
-  .grid {
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1px; background: var(--line); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
-  }
-  .card {
-    background: var(--bg); padding: 28px 24px 24px; min-height: 300px;
-    display: flex; flex-direction: column; justify-content: space-between; gap: 40px;
-    text-decoration: none; color: inherit; position: relative; overflow: hidden;
-    transition: background .3s;
-  }
-  .card:hover { background: #141416; }
-  .card .no { font-family: Inter, sans-serif; font-weight: 800; font-size: 13px; letter-spacing: .1em; color: var(--mute); display: flex; justify-content: space-between; }
-  .card .no i { font-style: normal; font-weight: 400; }
-  .card h2 { font-size: clamp(22px, 2.4vw, 30px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.25; }
-  .card p { font-size: 13.5px; line-height: 1.8; color: var(--mute); margin-top: 10px; font-weight: 300; }
-  .card .art { position: absolute; right: -30px; bottom: -30px; width: 200px; height: 200px; border-radius: 50%; opacity: .55; transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .4s; pointer-events: none; }
-  .card:hover .art { transform: scale(1.25) rotate(-8deg); opacity: .9; }
-  .card.todo { color: var(--mute); pointer-events: none; }
-  .card.todo h2 { color: #3a3a3f; }
-  .card.todo .art { display: none; }
-
-  footer { padding: 40px clamp(20px, 5vw, 64px); color: var(--mute); font-size: 12px; line-height: 1.9; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .list { display: grid; gap: 26px; padding-bottom: 80px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.03), 0 20px 50px -30px rgba(0,0,0,.25); }
+  .card.hidden { display: none; }
+  .preview { position: relative; aspect-ratio: 16 / 9; background: #0b0b0d; overflow: hidden; }
+  .preview iframe { position: absolute; left: 0; top: 0; width: 200%; height: 200%; transform: scale(.5); transform-origin: 0 0; border: 0; pointer-events: none; background: #0b0b0d; }
+  .preview .cover { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255,255,255,.45); font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .3em; }
+  .preview a.tap { position: absolute; inset: 0; }
+  .preview .no { position: absolute; left: 16px; top: 14px; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .2em; color: #fff; background: rgba(0,0,0,.45); backdrop-filter: blur(6px); padding: 5px 9px; border-radius: 6px; }
+  .body { padding: 22px 24px 20px; display: grid; grid-template-columns: 1fr auto; gap: 18px; align-items: start; }
+  .body h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .body h2 small { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10.5px; letter-spacing: .25em; color: var(--mute); font-weight: 400; margin-bottom: 6px; }
+  .body p { color: var(--mute); font-size: 14px; line-height: 1.85; margin-top: 10px; }
+  .btns { display: flex; gap: 8px; flex-direction: column; }
+  .btns a, .btns button { font: inherit; font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .2em; padding: 10px 16px; border-radius: 999px; border: 1px solid var(--fg); background: var(--fg); color: #fff; text-decoration: none; cursor: pointer; text-align: center; white-space: nowrap; }
+  .btns button { background: transparent; color: var(--fg); }
+  .btns button.on { background: var(--acc1); border-color: var(--acc1); color: #fff; }
+  .prompt { display: none; border-top: 1px solid var(--line); background: #faf9f6; padding: 18px 24px 22px; }
+  .prompt.on { display: block; }
+  .prompt .lbl { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .3em; color: var(--acc1); margin-bottom: 10px; }
+  .prompt pre { white-space: pre-wrap; font-family: "Noto Sans JP", sans-serif; font-size: 13.5px; line-height: 1.9; color: #2a2a30; }
+  footer { border-top: 1px solid var(--line); padding: 30px 0 50px; color: var(--mute); font-size: 12px; line-height: 1.9; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  footer a { color: var(--acc1); text-decoration: none; }
+  @media (max-width: 720px) { .body { grid-template-columns: 1fr; } .btns { flex-direction: row; } header { padding-top: 36px; } }
 </style>
 </head>
 <body>
-<header>
-  <h1>100<br>Pages<span>1ページ、1コンセプト。すべて日本語で読める。</span></h1>
-  <div class="count"><b id="done">0</b>/ 100</div>
-</header>
-
-<main class="grid" id="grid"></main>
-
-<footer>
-  <div>ルール：目を奪うこと。同じデザインを二度使わないこと。全力で遊ぶこと。</div>
-  <div>Claude Fable 5.1 が1ページずつ直列で制作</div>
-</footer>
+<div class="wrap">
+  <header>
+    <div class="kicker">COLLECTION · <span id="totalKicker">0</span> STUDIES · 日本語</div>
+    <h1>Fable 5.1 <span>100 Pages</span></h1>
+    <p class="lead">Claude Fable 5.1 が1ページずつ直列で作る、自己完結の視覚作品。生成アート、物理シミュレーション、製品ページ、遊べるもの。外部ライブラリなし、1ファイル完結、画面の文字はすべて日本語。カードを開くと実物が動き、「プロンプト」で生成に使った指示文が読める。</p>
+    <div class="tools">
+      <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="題名・番号・プロンプトで検索…"></label>
+      <div class="count"><b id="shown">0</b> / <span id="total">0</span> STUDIES</div>
+    </div>
+  </header>
+  <main class="list" id="list"></main>
+  <footer>
+    <div>ルール：目を奪うこと。同じデザインを二度使わないこと。全力で遊ぶこと。<br>形式は <a href="https://miaai-lab.github.io/Fable-5.1-100-HTML-Files/" target="_blank" rel="noopener">Mia さんの「Fable 5.1 · 100 HTML Files」</a>に倣った。</div>
+    <div>制作：Claude Fable 5.1（Claude Code）</div>
+  </footer>
+</div>
 
 <script>
-  // ページを追加するときはここに1行足す
-  const pages = [
-    { file: '01-lighthouse.html', title: '第七灯台 守灯日誌', desc: '真っ暗な海。回転する灯台の光が当たった場所だけ、日誌が読める。押さえると止まり、引くと回る。', art: 'radial-gradient(circle at 30% 30%, #ffe9b0, #3a2f10 45%, #03070d 70%)' },
-    { file: '02-receipt.html', title: 'ある一日のレシート', desc: '感熱紙プリンターから、一日の出来事が明細として印字される。値引：気にしないこと。', art: 'repeating-linear-gradient(90deg, #f7f4ec 0 3px, #2a2622 3px 5px, #f7f4ec 5px 9px, #2a2622 9px 10px)' },
-    { file: '03-kyoto-asa.html', title: '京の朝、五つの音', desc: '和紙の上を右から左へ流れる縦書きの巻物。夜明けまでに拾った五つの音。', art: 'radial-gradient(circle at 40% 40%, #f2ede2, #b8302c 60%, #f2ede2 61%)' },
-    { file: '04-shinkai.html', title: '深海へ、一万メートル', desc: 'スクロールで潜る。深度計が回り、光が消え、懐中電灯でしか文字が読めなくなる。', art: 'linear-gradient(to bottom, #2fb7d9, #041f36 50%, #000)' },
-    { file: '05-tsuki.html', title: 'Tsuki', desc: '月を、机の上に。今夜の月齢と同じかたちに灯る架空のランプの製品ページ。スクロールで満ち欠けと分解図。', art: 'radial-gradient(circle at 40% 40%, #fbf7ee, #d8d2c4 60%, #9a9385)' },
-    { file: '06-omosa.html', title: '言葉の重さ', desc: 'クリックで言葉が落ちてきて床に積もる。掴んで投げる。「さよなら」は 6.4 kg。', art: 'linear-gradient(135deg, #000 0 50%, #e8ff2a 50%)' },
-    { file: '07-hanabi.html', title: '隅田川花火大会', desc: '夏の夜、川面に映る花火。クリックで打ち上げ、長押しで連発。菊・牡丹・柳・千輪・冠。音あり。', art: 'radial-gradient(circle at 50% 50%, #ffd27a 0 3px, transparent 4px), repeating-conic-gradient(from 0deg, #ff6b3d 0 4deg, transparent 4deg 12deg), #02030a' },
-    { file: '08-ryushi.html', title: '粒子の書', desc: 'WebGL の粒子 40,000 個が日本語の文字に集まり、次の言葉へ組み替わる。マウスで吹き散らし、ドラッグで渦を巻く。', art: 'radial-gradient(circle at 50% 50%, #fff 0 2px, transparent 3px) 0 0 / 9px 9px, #000' },
-    { file: '09-cassette.html', title: 'MIXTAPE 1989', desc: '再生するとリールが回り、Web Audio がその場で十曲を即興演奏する。ヒスノイズとワウ・フラッター付き。裏返すとB面。', art: 'linear-gradient(90deg, #ffb7a5, #ffe08a, #a8e6cf, #c3b1e1)' },
-    { file: '10-kamihikoki.html', title: '紙ひこうき', desc: '丘の上から投げる飛距離ゲーム。押している間は機首上げ、上昇気流に乗り、切手を拾って遠くへ。夕方まで飛べるか。', art: 'linear-gradient(to bottom, #8ec5ea, #f6e3c8 60%, #6f9d5c 60%)' },
-  ];
-  const grid = document.getElementById('grid');
-  const total = 10; // 今回の目標本数（進むごとに増やす）
-  pages.forEach((p, i) => {
-    const a = document.createElement('a');
-    a.className = 'card'; a.href = 'pages/' + p.file;
-    a.innerHTML = `<div class="no"><span>No. ${String(i+1).padStart(3,'0')}</span><i>→</i></div><div><h2>${p.title}</h2><p>${p.desc}</p></div><div class="art" style="background:${p.art}"></div>`;
-    grid.appendChild(a);
+const pages = [
+  { file: '01-lighthouse.html', title: '第七灯台 守灯日誌', en: 'LIGHTHOUSE KEEPER’S LOG',
+    desc: '真っ暗な海の上で灯台の光が回り続け、光が通り過ぎた場所にだけ灯台守の日誌が浮かび上がる。conic-gradient のマスクで光の当たり方を再現し、雨・霧・波を重ねた夜の海。押さえると光が止まり、左右に引くと自分で回せる。',
+    prompt: '夜の海に立つ灯台のページを作って。画面中央に灯台、上部の灯室から円錐状の光が24秒で1回転する。光が通過した場所にだけ、灯台守の日誌（1952年冬、12項目）が短い余韻をもって浮かび上がり、光が去ると暗闇に戻る。雨のキャンバス、流れる霧、水平線の波を重ねる。マウスを押さえると回転が止まり、左右にドラッグすると回転を手で操作できる。左下に方位・回転数・発見済み項目数の計器を置く。フォントは明朝とモノスペース。' },
+  { file: '02-receipt.html', title: 'ある一日のレシート', en: 'THERMAL RECEIPT OF A DAY',
+    desc: '感熱紙プリンターから、一日の出来事が明細として印字される。「溜め息 ×14 ¥0」「値引 気にしないこと」。バーコード、領収スタンプ、ギザギザの切り口まで。ボタンで別の一日を再印字する。',
+    prompt: '感熱紙レシートのページを作って。上部に固定されたレシートプリンターがあり、そこから紙が垂れ下がる。紙には「ある一日の明細」として、朝・昼・夜の出来事（コーヒー ¥480、会議 ×3 返品不可、夕焼け 季節限定 ¥0 など）が行ごとに印字アニメーションで現れる。小計・消費税・値引・合計・お預り時間 24:00・お釣り 00:00・ポイント・バーコード・領収済スタンプ。ドット文字フォント。「別の一日を印字」ボタンで項目をシャッフルして再印字する。' },
+  { file: '03-kyoto-asa.html', title: '京の朝、五つの音', en: 'FIVE SOUNDS OF A KYOTO DAWN',
+    desc: '和紙の上を右から左へ流れる縦書きの巻物。鴨川の水音、知恩院の鐘、竹の擦れる音、露地の下駄、湯気の音。節ごとに墨の一筆が引かれ、左端から夜明けの光が差す。',
+    prompt: '縦書き・横スクロールの巻物ページを作って。テーマは「夜明け前の京都で拾った五つの音」。和紙の繊維感（SVG ノイズ）、生成り・墨・朱の三色、明朝体。右端の表紙から始まり、ホイールで左へ進む。各節に節番号・見出し・本文・時刻を縦組みで置き、表示された節に墨の一筆（SVG の stroke-dashoffset アニメ）が引かれる。上部に朱色の細い進行糸。左端に夜明けの光がゆっくり明滅する。' },
+  { file: '04-shinkai.html', title: '深海へ、一万メートル', en: 'DESCENT TO 10,994 M',
+    desc: 'スクロールで潜る。左の深度計が回り、水圧・水温・光量が変わり、有光層から超深海層へ背景が黒くなる。1,000m を越えると文字が読めなくなり、マウスの懐中電灯で照らして読む。発光生物とマリンスノー。',
+    prompt: '海面から一万メートルの海底まで、スクロールで潜っていくページを作って。左に固定の深度計（深度・水圧・水温・光量）を置き、スクロール位置に応じて滑らかに更新する。有光層・薄明層・漸深層・深海層・超深海層の5区間ごとに見出しと生物リスト（マンボウ、ダイオウイカ、チョウチンアンコウ、マリアナスネイルフィッシュ等）。背景は青から黒へ。水面には光の筋、深くなるとキャンバスのマリンスノーと発光生物。1,000m 以深は本文が暗くなり、マウス位置の懐中電灯で照らした範囲だけ読める。最後はチャレンジャー海淵 10,994 m。' },
+  { file: '05-tsuki.html', title: 'Tsuki', en: 'APPLE-STYLE PRODUCT PAGE',
+    desc: '「月を、机の上に。」今夜の月齢と同じかたちに灯る架空のランプの製品ページ。スティッキーの月がスクロールで満ち欠けし、分解図が開き、3色から選べ、仕様表と Pro との比較表、価格 CTA まで。',
+    prompt: 'Apple の製品ページのトーンで、架空のランプ「Tsuki」を紹介するページを作って。月齢を自動追従して満ち欠けするランプ。白背景・大きな太字見出し・余白多め。ヒーローに CSS だけで描いた月（クレーター・影・光輪）と台座、現在の実際の月齢を計算して影を付ける。スティッキーな月の横を特徴カードが流れ、スクロールに合わせて月が新月から満月へ。黒背景の分解図セクションではシェル・LED リング・天文暦モジュール・支柱・ベースがスクロールで分離し、部品名が付く。色（白磁・砂・墨）の切替、仕様グリッド、Tsuki と Tsuki Pro の比較表、価格と購入ボタン。' },
+  { file: '06-omosa.html', title: '言葉の重さ', en: 'WORDS HAVE WEIGHT',
+    desc: 'クリックすると言葉が落ちてきて床に積もる。「さよなら」は 6.4 kg、「いつか」は 0.3 kg。掴んで投げられる。白黒＋蛍光黄のブルータリズム、自前の矩形物理エンジン。',
+    prompt: '言葉に重さがあるという設定のブルータリズム的ページを作って。白背景・黒の極太ゴシック・蛍光イエローの差し色。空いた場所をクリックすると、言葉（ごめん 4.2kg、ありがとう 1.1kg、さよなら 6.4kg…）が黒い帯付きの巨大文字として上から落ち、重さに応じて大きさが変わり、床や他の言葉の上に積み重なる。言葉は掴んでドラッグし、投げられる（質量比で押し出す簡易 AABB 物理）。右上に床の上の合計重量、下に「揺らす」「片づける」ボタン。' },
+  { file: '07-hanabi.html', title: '隅田川花火大会', en: 'SUMIDA RIVER FIREWORKS',
+    desc: '夏の夜、川面に映る花火。菊・牡丹・柳・千輪・冠の五種を打ち上げる。上昇の火の粉、開花の残像、風による流れ、川面の反射の揺らぎ、遠景のビル群と塔、橋の灯り、手前の観客と提灯。Web Audio の笛と炸裂音。',
+    prompt: '隅田川の花火大会をキャンバスで作って。夜空・遠景のビル群と電波塔・橋・川・手前の観客のシルエットと提灯を背景に描く。クリックで花火を打ち上げ、長押しで連発。玉の種類は菊（尾を引く）、牡丹（多重の色の輪）、柳（金色に長く垂れる）、千輪（小玉が散ってから一斉に開く）、冠（銀と金がきらめく）。粒子は重力・空気抵抗・風の影響を受け、加算合成と残像で光る。川面には空のレイヤーを上下反転し横に揺らした反射を描く。右上に打上数・粒子数・風速、中央下に「第 n 号 昇り曲付 菊先紅光露」のようなプログラム名。Web Audio でヒューという上昇音とドンという炸裂音（ON/OFF）。' },
+  { file: '08-ryushi.html', title: '粒子の書', en: 'PARTICLE CALLIGRAPHY · WEBGL',
+    desc: 'WebGL の粒子 40,000 個が日本語の文字に集まり、次の言葉へ組み替わる。マウスで吹き散らし、ドラッグで渦を巻く。速い粒子ほど熱く光る。集合／風／重力の三モード。60fps。',
+    prompt: 'WebGL で4万個の粒子を描くページを作って。黒背景。オフスクリーンキャンバスに明朝体で日本語の言葉（粒、言葉は粒でできている、風、灯、海…）を描いてピクセルをサンプリングし、各粒子の目標座標にする。粒子はばねで目標へ集まり、マウスが近づくと吹き散らされ、ドラッグ中は渦を巻く。速度が速い粒子は暖色に光る（加算合成、点スプライト）。クリックで次の言葉へモーフィング。下に言葉の一覧ボタンと、集合／風（ノイズの流れ場）／重力（床に積もる）のモード切替。左上に粒子数・fps・集合率。' },
+  { file: '09-cassette.html', title: 'MIXTAPE 1989', en: 'WEB AUDIO CASSETTE',
+    desc: '再生するとリールが回り、Web Audio がその場で十曲を即興演奏する（コード進行・メロディ・キック・ハット、ヒスノイズとワウ・フラッター付き）。裏返すと B 面。80年代パステルとメンフィス柄。',
+    prompt: '80年代のミックステープのページを作って。パステル（ピーチ・ミント・ラベンダー・黄）の背景にメンフィス柄。中央に CSS で描いたカセットテープ（ラベル、窓、回転するリール、ネジ、テープの巻き量）。PLAY で Web Audio が曲を即興生成する：曲ごとにキー・BPM・コード進行・波形を持ち、コード＋コードトーンからのランダムなメロディ＋キックとハイハット。ローパス、テープのヒスノイズ、LFO によるワウ・フラッターを掛ける。裏返すボタンで 3D 回転して B 面。横の J カードに曲目リスト（手書き風フォント）、クリックで曲へジャンプ。テープカウンターと VU メーター。' },
+  { file: '10-kamihikoki.html', title: '紙ひこうき', en: 'PAPER PLANE · GLIDE GAME',
+    desc: '丘の上から紙飛行機を投げる飛距離ゲーム。ドラッグで投げ、押している間は機首上げ、上昇気流に乗り、切手を拾い、鳥を避ける。距離とともに夕方になる視差の風景。ベスト記録を保存。',
+    prompt: '紙飛行機の飛距離ゲームを作って。パステルの空、視差で流れる山と町、丘の上から投げる。ドラッグして放すと投げ（引いた長さで威力）、飛行中に押している間は機首が上がる（揚力・抗力・重力の簡易空力）。上昇気流（上に昇る粒子の柱）に入ると高度が上がり、赤い切手を取ると +50m、鳥に当たるとスピンする。距離に応じて空が夕焼けに変わる。上に距離・高度・ベスト、着地すると距離とランク（校庭を越えた、川を渡った…）を表示。R でやり直し。' },
+  { file: '11-koi.html', title: '錦鯉の池', en: 'NISHIKIGOI POND',
+    desc: '上から見下ろす池。揺れる光の網、砂利と石、睡蓮。錦鯉（紅白・大正三色・黄金・昭和三色・浅黄・白写り）が背骨の連鎖で体をしならせ、互いと石を避けて泳ぐ。クリックで餌をまくと寄ってきて、水面に波紋が広がる。',
+    prompt: '真上から見た錦鯉の池をキャンバスで作って。深い青緑の池底に砂利と石、水面に睡蓮の葉と花。太陽の光の模様（コースティクス）が揺れる。鯉は14節の背骨連鎖で表現し、頭が進むと各節が追従して体がしなる。品種ごとに地色と模様（紅白・大正三色・黄金・昭和三色・浅黄・白写り）、尾びれと胸びれは泳ぎに合わせて動く。壁・石・他の鯉を避けて徘徊し、クリックで餌をまくと最寄りの鯉が寄ってきて食べる。餌や鯉の動きで波紋が広がり、池底に鯉の影が落ちる。右上に匹数・水温・餌の数、左下に品種の凡例。' },
+];
+
+const list = document.getElementById('list');
+document.getElementById('total').textContent = pages.length;
+document.getElementById('totalKicker').textContent = pages.length;
+const cards = pages.map((p, i) => {
+  const no = String(i + 1).padStart(3, '0');
+  const el = document.createElement('article');
+  el.className = 'card'; el.dataset.q = (no + ' ' + p.title + ' ' + p.en + ' ' + p.desc + ' ' + p.prompt).toLowerCase();
+  el.innerHTML = `
+    <div class="preview" data-src="pages/${p.file}"><div class="cover">LOADING</div><div class="no">${no}</div><a class="tap" href="pages/${p.file}" target="_blank" rel="noopener" aria-label="${p.title} を開く"></a></div>
+    <div class="body">
+      <div><h2><small>${no} · ${p.en}</small>${p.title}</h2><p>${p.desc}</p></div>
+      <div class="btns"><a href="pages/${p.file}" target="_blank" rel="noopener">開く</a><button type="button">プロンプト</button></div>
+    </div>
+    <div class="prompt"><div class="lbl">PROMPT · この作品を生成する指示文</div><pre>${p.prompt}</pre></div>`;
+  el.querySelector('button').addEventListener('click', (e) => { const pr = el.querySelector('.prompt'); pr.classList.toggle('on'); e.currentTarget.classList.toggle('on', pr.classList.contains('on')); });
+  list.appendChild(el);
+  return el;
+});
+
+// 見えているカードだけ iframe を読み込む（重い作品が同時に動かないように）
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(en => {
+    const pv = en.target; let f = pv.querySelector('iframe');
+    if (en.isIntersecting) { if (!f) { f = document.createElement('iframe'); f.src = pv.dataset.src; f.loading = 'lazy'; f.tabIndex = -1; f.setAttribute('aria-hidden', 'true'); pv.insertBefore(f, pv.querySelector('.no')); } }
+    else if (f) f.remove();
   });
-  for (let i = pages.length; i < total; i++) {
-    const d = document.createElement('div');
-    d.className = 'card todo';
-    d.innerHTML = `<div class="no"><span>No. ${String(i+1).padStart(3,'0')}</span></div><div><h2>制作中</h2></div>`;
-    grid.appendChild(d);
-  }
-  document.getElementById('done').textContent = pages.length;
+}, { rootMargin: '200px 0px' });
+cards.forEach(c => io.observe(c.querySelector('.preview')));
+
+const q = document.getElementById('q'), shown = document.getElementById('shown');
+const filter = () => { const v = q.value.trim().toLowerCase(); let n = 0; cards.forEach(c => { const ok = !v || c.dataset.q.includes(v); c.classList.toggle('hidden', !ok); if (ok) n++; }); shown.textContent = n; };
+q.addEventListener('input', filter); filter();
 </script>
 </body>
 </html>
