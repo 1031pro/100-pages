@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>粒子の書</title>
+<meta name="description" content="WebGLの粒子が日本語の文字に集まり、次の言葉へ組み替わる。マウスで吹き散らせる。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@700&family=IBM+Plex+Mono:wght@300;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: #000; }
+  body { font-family: "IBM Plex Mono", monospace; color: #cfd3d8; cursor: crosshair; user-select: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .hud { position: fixed; left: 22px; top: 20px; font-size: 11px; letter-spacing: .18em; line-height: 1.9; opacity: .7; pointer-events: none; }
+  .hud b { color: #fff; font-weight: 500; }
+  .title { position: fixed; right: 22px; top: 20px; text-align: right; font-family: "Shippori Mincho", serif; font-size: 20px; letter-spacing: .3em; color: #fff; pointer-events: none; }
+  .title small { display: block; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .25em; opacity: .55; margin-top: 6px; }
+  .words { position: fixed; left: 22px; bottom: 20px; display: flex; flex-wrap: wrap; gap: 6px; max-width: 70vw; }
+  .words button { font: inherit; font-family: "Shippori Mincho", serif; font-size: 14px; letter-spacing: .1em; color: #9aa0a8; background: transparent; border: 1px solid rgba(255,255,255,.14); padding: 5px 10px; cursor: pointer; transition: all .2s; }
+  .words button:hover, .words button.on { color: #fff; border-color: #fff; }
+  .modes { position: fixed; right: 22px; bottom: 20px; display: flex; gap: 6px; }
+  .modes button { font: inherit; font-size: 10px; letter-spacing: .2em; color: #9aa0a8; background: transparent; border: 1px solid rgba(255,255,255,.14); padding: 6px 10px; cursor: pointer; }
+  .modes button.on { color: #000; background: #fff; border-color: #fff; }
+  .hint { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); font-size: 10px; letter-spacing: .25em; opacity: .5; white-space: nowrap; pointer-events: none; }
+  @media (max-width: 720px) { .hint { display: none; } .words { max-width: 60vw; } }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div class="hud">粒子 <b id="n">0</b><br>fps <b id="fps">0</b><br>集合率 <b id="conv">0</b>%</div>
+<div class="title">粒子の書<small>40,000 PARTICLES · WEBGL</small></div>
+<div class="words" id="words"></div>
+<div class="modes"><button data-m="gather" class="on">集合</button><button data-m="wind">風</button><button data-m="gravity">重力</button></div>
+<div class="hint">クリックで次の言葉　　マウスで吹き散らす　　ドラッグで渦</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('gl');
+  const gl = canvas.getContext('webgl', { antialias: false, alpha: false, preserveDrawingBuffer: false });
+  if (!gl) { document.body.innerHTML = '<p style="padding:40px">WebGL が使えません。</p>'; return; }
+
+  const N = 40000;
+  const words = ['粒', '言葉は粒でできている', '風', '灯', '海', '雨のち晴れ', '静', '百のページ', '夢', '終わり'];
+  let wi = 0, mode = 'gather';
+
+  // ---------- シェーダー ----------
+  const vs = `
+    attribute vec2 aPos; attribute float aSize; attribute float aHeat;
+    uniform vec2 uRes; varying float vHeat;
+    void main(){
+      vec2 clip = (aPos / uRes) * 2.0 - 1.0;
+      gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
+      gl_PointSize = aSize * (1.0 + aHeat * 1.5);
+      vHeat = aHeat;
+    }`;
+  const fs = `
+    precision mediump float; varying float vHeat;
+    void main(){
+      vec2 d = gl_PointCoord - 0.5; float r = dot(d,d);
+      if (r > 0.25) discard;
+      float a = smoothstep(0.25, 0.0, r);
+      vec3 cold = vec3(0.86, 0.90, 0.96);
+      vec3 hot  = vec3(1.0, 0.55, 0.25);
+      vec3 col = mix(cold, hot, clamp(vHeat*1.6, 0.0, 1.0));
+      gl_FragColor = vec4(col * a * 0.9, a);
+    }`;
+  const sh = (t, s) => { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(o)); return o; };
+  const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(prog); gl.useProgram(prog);
+  const aPos = gl.getAttribLocation(prog, 'aPos'), aSize = gl.getAttribLocation(prog, 'aSize'), aHeat = gl.getAttribLocation(prog, 'aHeat'), uRes = gl.getUniformLocation(prog, 'uRes');
+  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+
+  // ---------- 状態 ----------
+  const pos = new Float32Array(N * 2), vel = new Float32Array(N * 2), tgt = new Float32Array(N * 2), size = new Float32Array(N), heat = new Float32Array(N);
+  let W = 0, H = 0, dpr = Math.min(2, devicePixelRatio || 1);
+  const bufPos = gl.createBuffer(), bufSize = gl.createBuffer(), bufHeat = gl.createBuffer();
+  for (let i = 0; i < N; i++) size[i] = (1.2 + Math.random() * 2.2) * dpr;
+
+  const resize = () => {
+    W = innerWidth; H = innerHeight; dpr = Math.min(2, devicePixelRatio || 1);
+    canvas.width = W * dpr; canvas.height = H * dpr; gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform2f(uRes, W, H);
+    setWord(words[wi]);
+  };
+
+  // ---------- 文字→目標座標 ----------
+  const off = document.createElement('canvas'), ox = off.getContext('2d', { willReadFrequently: true });
+  const setWord = (text) => {
+    const w = Math.max(320, W), h = Math.max(240, H);
+    off.width = w; off.height = h; ox.clearRect(0, 0, w, h);
+    ox.fillStyle = '#fff'; ox.textAlign = 'center'; ox.textBaseline = 'middle';
+    let fsz = Math.min(h * 0.62, (w * 0.86) / Math.max(1, text.length) * 1.25);
+    ox.font = `700 ${fsz}px "Shippori Mincho", "Hiragino Mincho ProN", serif`;
+    ox.fillText(text, w / 2, h / 2);
+    const img = ox.getImageData(0, 0, w, h).data;
+    const pts = [];
+    const step = text.length > 4 ? 2 : 3;
+    for (let y = 0; y < h; y += step) for (let x = 0; x < w; x += step) if (img[(y * w + x) * 4 + 3] > 120) pts.push(x, y);
+    const M = pts.length / 2;
+    for (let i = 0; i < N; i++) {
+      const k = (Math.random() * M) | 0;
+      tgt[i * 2] = pts[k * 2] + (Math.random() - .5) * step * 1.4;
+      tgt[i * 2 + 1] = pts[k * 2 + 1] + (Math.random() - .5) * step * 1.4;
+    }
+    document.querySelectorAll('.words button').forEach((b, k) => b.classList.toggle('on', k === wi));
+  };
+  for (let i = 0; i < N; i++) { pos[i * 2] = Math.random() * innerWidth; pos[i * 2 + 1] = Math.random() * innerHeight; }
+
+  // ---------- 入力 ----------
+  const mouse = { x: -9999, y: -9999, down: false, vx: 0, vy: 0 };
+  addEventListener('pointermove', (e) => { mouse.vx = e.clientX - mouse.x; mouse.vy = e.clientY - mouse.y; mouse.x = e.clientX; mouse.y = e.clientY; });
+  addEventListener('pointerleave', () => { mouse.x = -9999; mouse.y = -9999; });
+  let downAt = 0;
+  addEventListener('pointerdown', (e) => { if (e.target.closest('button')) return; mouse.down = true; downAt = performance.now(); });
+  addEventListener('pointerup', (e) => { if (e.target.closest('button')) return; mouse.down = false; if (performance.now() - downAt < 220) next(); });
+  const next = () => { wi = (wi + 1) % words.length; setWord(words[wi]); };
+  const wordsEl = document.getElementById('words');
+  words.forEach((w, k) => { const b = document.createElement('button'); b.textContent = w; b.addEventListener('click', () => { wi = k; setWord(w); }); wordsEl.appendChild(b); });
+  document.querySelectorAll('.modes button').forEach(b => b.addEventListener('click', () => { mode = b.dataset.m; document.querySelectorAll('.modes button').forEach(x => x.classList.toggle('on', x === b)); }));
+
+  // ---------- ループ ----------
+  const nEl = document.getElementById('n'), fpsEl = document.getElementById('fps'), convEl = document.getElementById('conv');
+  nEl.textContent = N.toLocaleString();
+  let last = performance.now(), frames = 0, fpsT = last, t = 0;
+  const step = (now) => {
+    const dt = Math.min(0.033, (now - last) / 1000); last = now; t += dt;
+    let near = 0;
+    const mx = mouse.x, my = mouse.y, R = 140, R2 = R * R;
+    const swirl = mouse.down;
+    for (let i = 0; i < N; i++) {
+      const ix = i * 2, iy = ix + 1;
+      let x = pos[ix], y = pos[iy], vx = vel[ix], vy = vel[iy];
+      // 目標へ（ばね）
+      if (mode === 'gather') {
+        const dx = tgt[ix] - x, dy = tgt[iy] - y;
+        vx += dx * 0.085; vy += dy * 0.085;
+        if (dx * dx + dy * dy < 9) near++;
+      } else if (mode === 'wind') {
+        const n = Math.sin(y * 0.012 + t * 0.9) * Math.cos(x * 0.008 - t * 0.5);
+        vx += 0.9 + n * 1.4; vy += Math.sin(x * 0.01 + t) * 0.6;
+        if (x > W + 10) { x = -10; y = Math.random() * H; }
+      } else {
+        vy += 0.55;
+        if (y > H - 2) { y = H - 2; vy = -Math.abs(vy) * 0.35; vx *= 0.9; }
+        if (x < 0) { x = 0; vx = -vx * 0.5; } if (x > W) { x = W; vx = -vx * 0.5; }
+      }
+      // マウス：吹き散らす／渦
+      const dx = x - mx, dy = y - my, d2 = dx * dx + dy * dy;
+      if (d2 < R2) {
+        const d = Math.sqrt(d2) + 0.001, f = (1 - d / R);
+        if (swirl) { vx += (-dy / d) * f * 9 + (dx / d) * f * 1.5; vy += (dx / d) * f * 9 + (dy / d) * f * 1.5; }
+        else { vx += (dx / d) * f * 7 + mouse.vx * 0.05 * f; vy += (dy / d) * f * 7 + mouse.vy * 0.05 * f; }
+      }
+      vx *= 0.86; vy *= 0.86;
+      x += vx; y += vy;
+      pos[ix] = x; pos[iy] = y; vel[ix] = vx; vel[iy] = vy;
+      const sp = vx * vx + vy * vy;
+      heat[i] = heat[i] * 0.9 + Math.min(1, sp / 60) * 0.1;
+    }
+    mouse.vx *= 0.5; mouse.vy *= 0.5;
+    gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufPos); gl.bufferData(gl.ARRAY_BUFFER, pos, gl.DYNAMIC_DRAW); gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufSize); gl.bufferData(gl.ARRAY_BUFFER, size, gl.STATIC_DRAW); gl.enableVertexAttribArray(aSize); gl.vertexAttribPointer(aSize, 1, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufHeat); gl.bufferData(gl.ARRAY_BUFFER, heat, gl.DYNAMIC_DRAW); gl.enableVertexAttribArray(aHeat); gl.vertexAttribPointer(aHeat, 1, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.POINTS, 0, N);
+    frames++; if (now - fpsT > 500) { fpsEl.textContent = Math.round(frames * 1000 / (now - fpsT)); frames = 0; fpsT = now; convEl.textContent = Math.round(near / N * 100); }
+    requestAnimationFrame(step);
+  };
+
+  addEventListener('resize', resize);
+  document.fonts.ready.then(() => { resize(); requestAnimationFrame(step); });
+  // 自動で言葉を進める（操作が無いとき）
+  let idle = 0; setInterval(() => { if (mode === 'gather' && mouse.x < 0) next(); }, 6500);
+})();
+</script>
+</body>
+</html>
