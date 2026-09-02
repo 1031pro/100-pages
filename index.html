@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fable 5.1 · 百景</title>
-<meta name="description" content="Fable 5.1 による百の視覚作品。生成アート、物理、風景、インターフェース、遊べるもの。">
+<title>Fable 5.1 Studies</title>
+<meta name="description" content="Fable 5.1 による視覚作品集。生成アート、物理、風景、インターフェース、遊べるもの。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -55,9 +55,9 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="kicker">HYAKKEI · ONE HUNDRED VIEWS · <span id="totalKicker">0</span> SO FAR</div>
-    <h1>Fable 5.1 <span>百景</span></h1>
-    <p class="lead">生成アート、物理シミュレーション、風景、インターフェース、遊べるもの。百の視覚作品。カードを開くと動く実物へ。「プロンプト」で、その作品を生み出した指示文が読める。</p>
+    <div class="kicker">COLLECTION · <span id="totalKicker">0</span> STUDIES</div>
+    <h1>Fable 5.1 <span>Studies</span></h1>
+    <p class="lead">生成アート、物理シミュレーション、風景、インターフェース、遊べるもの。カードを開くと動く実物へ。「プロンプト」で、その作品を生み出した指示文が読める。</p>
     <div class="tools">
       <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="題名・番号・プロンプトで検索…"></label>
       <div class="count"><b id="shown">0</b> / <span id="total">0</span> STUDIES</div>
@@ -65,7 +65,7 @@
   </header>
   <main class="list" id="list"></main>
   <footer>
-    <div>Fable 5.1 · 百景</div>
+    <div>Fable 5.1 Studies</div>
     <div>Generated with Claude Fable 5.1</div>
   </footer>
 </div>
@@ -105,6 +105,9 @@ const pages = [
   { file: '11-koi.html', title: '錦鯉の池', en: 'NISHIKIGOI POND',
     desc: '上から見下ろす池。揺れる光の網、砂利と石、睡蓮。錦鯉（紅白・大正三色・黄金・昭和三色・浅黄・白写り）が背骨の連鎖で体をしならせ、互いと石を避けて泳ぐ。クリックで餌をまくと寄ってきて、水面に波紋が広がる。',
     prompt: '真上から見た錦鯉の池をキャンバスで作って。深い青緑の池底に砂利と石、水面に睡蓮の葉と花。太陽の光の模様（コースティクス）が揺れる。鯉は14節の背骨連鎖で表現し、頭が進むと各節が追従して体がしなる。品種ごとに地色と模様（紅白・大正三色・黄金・昭和三色・浅黄・白写り）、尾びれと胸びれは泳ぎに合わせて動く。壁・石・他の鯉を避けて徘徊し、クリックで餌をまくと最寄りの鯉が寄ってきて食べる。餌や鯉の動きで波紋が広がり、池底に鯉の影が落ちる。右上に匹数・水温・餌の数、左下に品種の凡例。' },
+  { file: '12-yukiguni.html', title: '雪野駅', en: 'SNOW COUNTRY STATION',
+    desc: '深夜、雪の降り続く木造の駅。三層の雪が風に流れ、街灯の光の中だけ明るく光る。傘をさした人影の白い息。数十秒おきに最終列車が減速して停まり、扉が開き、去っていく。積雪はゆっくり増える。',
+    prompt: '雪国の小さな木造駅の深夜をキャンバスで作って。雪をかぶった山並みと杉林、雪の積もった線路、ホーム、暖色の窓と入口の明かりがある駅舎、駅名板「雪野」、街灯、ベンチに傘をさした人影と白い息。雪は奥行きの異なる千数百個の粒で、風（マウス位置で変わる）に流れ、街灯の光の円錐に入ると明るくなる。手前には大きくぼけた雪。列車が左から減速して到着し、扉が開いて数秒停車し、加速して去る。前照灯の光芒と尾灯、屋根の雪。右上に気温・積雪・風速、下に次の列車までの秒数。' },
 ];
 
 const list = document.getElementById('list');

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雪国の駅</title>
+<meta name="description" content="深夜、雪の降り続く木造の駅。数分おきに最終列車が着いて、去っていく。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=IBM+Plex+Mono:wght@300;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: #060912; }
+  body { font-family: "Shippori Mincho", serif; color: #e9edf3; user-select: none; -webkit-user-select: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .hud { position: fixed; inset: 0; pointer-events: none; }
+  .hud > * { position: absolute; }
+  .t { left: 26px; top: 22px; }
+  .t h1 { font-size: 26px; letter-spacing: .4em; font-weight: 700; text-shadow: 0 2px 20px rgba(0,0,0,.7); }
+  .t p { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .28em; color: rgba(233,237,243,.6); margin-top: 6px; }
+  .n { right: 26px; top: 22px; text-align: right; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .22em; color: rgba(233,237,243,.6); line-height: 1.9; }
+  .n b { color: #fff; font-weight: 500; }
+  .board { left: 50%; bottom: 26px; transform: translateX(-50%); font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .25em; color: rgba(233,237,243,.7); text-align: center; line-height: 1.9; white-space: nowrap; }
+  .board b { color: #ffb86b; font-weight: 500; }
+  .hint { right: 26px; bottom: 26px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .25em; color: rgba(233,237,243,.45); text-align: right; }
+  @media (max-width: 720px) { .hint { display: none; } .board { font-size: 10px; } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hud">
+  <div class="t"><h1>雪野駅</h1><p>YUKINO STATION · 23:40 · SNOW LOOP</p></div>
+  <div class="n">気温 <b id="temp">-4.0</b> ℃<br>積雪 <b id="snow">0</b> cm<br>風 <b id="wind">0.0</b> m/s</div>
+  <div class="board" id="board">次の列車　<b id="next">--</b></div>
+  <div class="hint">マウスを動かすと風が変わる</div>
+</div>
+
+<script>
+(() => {
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  let W, H, dpr, G; // G = 地面の高さ(y)
+  const resize = () => { dpr = Math.min(1.5, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); G = H * 0.78; buildScene(); };
+
+  // ---------- 静的な情景（オフスクリーン） ----------
+  const scene = document.createElement('canvas'), sc = scene.getContext('2d');
+  const lamps = [];
+  const buildScene = () => {
+    scene.width = W; scene.height = H;
+    // 空
+    const sky = sc.createLinearGradient(0, 0, 0, G); sky.addColorStop(0, '#05070f'); sky.addColorStop(0.7, '#0b1120'); sky.addColorStop(1, '#141c2e'); sc.fillStyle = sky; sc.fillRect(0, 0, W, H);
+    // 遠い山（雪をかぶった）
+    const mtn = (base, amp, col, seed, snowCol) => {
+      sc.beginPath(); sc.moveTo(0, H);
+      const pts = [];
+      for (let x = 0; x <= W + 20; x += 20) { const k = x / 160 + seed; const y = base - (Math.sin(k) * 0.6 + Math.sin(k * 2.3 + 1) * 0.3 + Math.sin(k * 5.1) * 0.1) * amp - amp * 0.4; pts.push([x, y]); sc.lineTo(x, y); }
+      sc.lineTo(W + 20, H); sc.closePath(); sc.fillStyle = col; sc.fill();
+      sc.strokeStyle = snowCol; sc.lineWidth = 2.5; sc.beginPath(); pts.forEach(([x, y], i) => i ? sc.lineTo(x, y) : sc.moveTo(x, y)); sc.stroke();
+    };
+    mtn(G - 60, 150, '#111a2c', 0.4, 'rgba(180,195,220,.25)');
+    mtn(G - 20, 100, '#0d1422', 2.1, 'rgba(180,195,220,.35)');
+    // 杉林
+    for (let x = -10; x < W; x += 14 + Math.random() * 10) { const h = 40 + Math.random() * 70; sc.fillStyle = '#080d18'; sc.beginPath(); sc.moveTo(x, G - 6); sc.lineTo(x + 7, G - 6 - h); sc.lineTo(x + 14, G - 6); sc.closePath(); sc.fill(); sc.fillStyle = 'rgba(200,210,230,.18)'; sc.beginPath(); sc.moveTo(x + 4, G - 6 - h * .55); sc.lineTo(x + 7, G - 6 - h); sc.lineTo(x + 10, G - 6 - h * .55); sc.closePath(); sc.fill(); }
+    // 線路の敷地（奥）と雪面
+    sc.fillStyle = '#d9dfe9'; sc.fillRect(0, G - 6, W, H);
+    const gr = sc.createLinearGradient(0, G, 0, H); gr.addColorStop(0, 'rgba(90,110,150,.35)'); gr.addColorStop(1, 'rgba(20,30,50,.6)'); sc.fillStyle = gr; sc.fillRect(0, G - 6, W, H);
+    // レール（手前）
+    const ry = G + 40;
+    sc.fillStyle = '#30384a'; sc.fillRect(0, ry - 8, W, 26);
+    for (let x = 0; x < W; x += 22) { sc.fillStyle = '#4a4033'; sc.fillRect(x, ry - 8, 12, 26); sc.fillStyle = 'rgba(230,236,245,.6)'; sc.fillRect(x, ry - 8, 12, 4); }
+    sc.fillStyle = '#8a93a3'; sc.fillRect(0, ry - 4, W, 3); sc.fillRect(0, ry + 12, W, 3);
+    sc.fillStyle = '#c7ced9'; sc.fillRect(0, ry - 5, W, 1); sc.fillRect(0, ry + 11, W, 1);
+    // ホーム（レールの奥、駅舎の前）
+    const px = W * 0.42, pw = W * 0.62, py = G - 6;
+    sc.fillStyle = '#232a3a'; sc.fillRect(px, py - 16, pw, 18);
+    sc.fillStyle = '#e6ebf3'; sc.fillRect(px, py - 22, pw, 8); // 積もった雪
+    sc.fillStyle = '#f4d35e'; for (let x = px + 10; x < px + pw; x += 18) sc.fillRect(x, py - 15, 10, 2); // 点字ブロック風の縁
+    // 駅舎（木造）
+    const bx = W * 0.6, bw = Math.min(360, W * 0.34), bh = 150, by = py - 22;
+    sc.fillStyle = '#1a1510'; sc.fillRect(bx, by - bh, bw, bh);
+    sc.fillStyle = 'rgba(255,255,255,.04)'; for (let y = by - bh; y < by; y += 8) sc.fillRect(bx, y, bw, 1);
+    // 屋根
+    sc.fillStyle = '#0e0b08'; sc.beginPath(); sc.moveTo(bx - 30, by - bh); sc.lineTo(bx + bw * .5, by - bh - 70); sc.lineTo(bx + bw + 30, by - bh); sc.closePath(); sc.fill();
+    sc.fillStyle = '#eef2f8'; sc.beginPath(); sc.moveTo(bx - 34, by - bh + 2); sc.lineTo(bx + bw * .5, by - bh - 84); sc.lineTo(bx + bw + 34, by - bh + 2); sc.lineTo(bx + bw + 34, by - bh - 8); sc.lineTo(bx + bw * .5, by - bh - 96); sc.lineTo(bx - 34, by - bh - 8); sc.closePath(); sc.fill();
+    // 庇
+    sc.fillStyle = '#0e0b08'; sc.fillRect(bx - 20, by - 62, bw + 40, 8); sc.fillStyle = '#eef2f8'; sc.fillRect(bx - 22, by - 70, bw + 44, 9);
+    // 窓（暖色）
+    const win = (x, y, w, h) => { const g2 = sc.createLinearGradient(x, y, x, y + h); g2.addColorStop(0, '#ffd889'); g2.addColorStop(1, '#f2a94a'); sc.fillStyle = g2; sc.fillRect(x, y, w, h); sc.fillStyle = 'rgba(60,40,20,.7)'; sc.fillRect(x + w / 2 - 1, y, 2, h); sc.fillRect(x, y + h / 2 - 1, w, 2); sc.fillStyle = 'rgba(255,200,120,.16)'; sc.fillRect(x - 14, y - 10, w + 28, h + 30); };
+    win(bx + 26, by - 122, 44, 40); win(bx + bw - 70, by - 122, 44, 40);
+    // 入口（引き戸、明かり）
+    const dx = bx + bw / 2 - 30; const dg = sc.createLinearGradient(dx, by - 52, dx, by); dg.addColorStop(0, '#ffe2a6'); dg.addColorStop(1, '#f0b35a'); sc.fillStyle = dg; sc.fillRect(dx, by - 52, 60, 52);
+    sc.fillStyle = 'rgba(60,40,20,.6)'; sc.fillRect(dx + 29, by - 52, 2, 52); for (let y = by - 48; y < by; y += 10) sc.fillRect(dx, y, 60, 1);
+    // 光だまり（入口の前）
+    const pool = sc.createRadialGradient(dx + 30, by + 4, 2, dx + 30, by + 4, 90); pool.addColorStop(0, 'rgba(255,205,120,.45)'); pool.addColorStop(1, 'rgba(255,205,120,0)'); sc.fillStyle = pool; sc.fillRect(dx - 100, by - 20, 260, 60);
+    // 駅名板
+    sc.fillStyle = '#f4f6fa'; sc.fillRect(bx + bw / 2 - 64, by - 100, 128, 30); sc.fillStyle = '#1a1a1a'; sc.font = '700 18px "Shippori Mincho", serif'; sc.textAlign = 'center'; sc.textBaseline = 'middle'; sc.fillText('雪　野', bx + bw / 2, by - 86); sc.fillStyle = '#c0392b'; sc.fillRect(bx + bw / 2 - 64, by - 72, 128, 3);
+    // ベンチと人影
+    sc.fillStyle = '#0c0a08'; sc.fillRect(px + 70, by - 18, 60, 6); sc.fillRect(px + 74, by - 12, 4, 12); sc.fillRect(px + 122, by - 12, 4, 12);
+    sc.fillStyle = '#eef2f8'; sc.fillRect(px + 70, by - 21, 60, 3);
+    const hx = px + 100; sc.fillStyle = '#07060a'; sc.beginPath(); sc.arc(hx, by - 54, 7, 0, 6.28); sc.fill(); sc.fillRect(hx - 9, by - 48, 18, 30); sc.fillRect(hx - 8, by - 20, 6, 20); sc.fillRect(hx + 2, by - 20, 6, 20);
+    sc.beginPath(); sc.moveTo(hx - 26, by - 62); sc.quadraticCurveTo(hx, by - 90, hx + 26, by - 62); sc.closePath(); sc.fill(); sc.fillStyle = '#eef2f8'; sc.beginPath(); sc.moveTo(hx - 26, by - 62); sc.quadraticCurveTo(hx, by - 92, hx + 26, by - 62); sc.quadraticCurveTo(hx, by - 86, hx - 26, by - 62); sc.fill(); sc.fillStyle = '#07060a'; sc.fillRect(hx, by - 62, 2, 20);
+    // 街灯の位置
+    lamps.length = 0; [px + 30, px + pw * 0.45, px + pw - 40].forEach(x => lamps.push({ x, y: by - 120 }));
+    lamps.forEach(l => { sc.fillStyle = '#0c0a08'; sc.fillRect(l.x - 2, l.y, 4, 120 - 22); sc.fillRect(l.x - 12, l.y - 4, 24, 6); sc.fillStyle = '#eef2f8'; sc.fillRect(l.x - 12, l.y - 8, 24, 4); });
+  };
+
+  // ---------- 雪 ----------
+  const flakes = [];
+  const N = 1400;
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const initSnow = () => { flakes.length = 0; for (let i = 0; i < N; i++) { const z = Math.random(); flakes.push({ x: Math.random() * (innerWidth + 200) - 100, y: Math.random() * innerHeight, z, r: 0.6 + z * 2.6, s: 0.5 + z * 1.6, ph: Math.random() * 6.28 }); } };
+  initSnow();
+
+  // ---------- 列車 ----------
+  const train = { state: 'wait', x: 0, v: 0, t: 0, timer: 8 };
+  const CAR = 180, CARS = 3, L = CAR * CARS + 20;
+  const stopX = () => W * 0.42 + 40;
+  const drawTrain = () => {
+    const x = train.x, y = G + 40 - 6; // 手前のレールの高さ
+    const bodyY = y - 74;
+    for (let c = 0; c < CARS; c++) {
+      const cx = x + c * (CAR + 10);
+      // 車体
+      ctx.fillStyle = '#1a2233'; ctx.fillRect(cx, bodyY, CAR, 78);
+      ctx.fillStyle = '#2d3a55'; ctx.fillRect(cx, bodyY + 30, CAR, 20);
+      ctx.fillStyle = '#c0392b'; ctx.fillRect(cx, bodyY + 52, CAR, 6);
+      // 窓
+      for (let k = 0; k < 6; k++) { const wx = cx + 14 + k * 27; const lit = (k + c) % 5 !== 3; ctx.fillStyle = lit ? '#ffe3a8' : '#3a4560'; ctx.fillRect(wx, bodyY + 10, 20, 18); if (lit) { ctx.fillStyle = 'rgba(255,220,150,.12)'; ctx.fillRect(wx - 6, bodyY + 28, 32, 50); } }
+      // ドア（停車中は開く）
+      const open = train.state === 'stop' ? Math.min(1, train.t / 1.2) : train.state === 'depart' ? Math.max(0, 1 - train.t / 1.2) : 0;
+      const doorX = cx + CAR - 46; ctx.fillStyle = '#ffe3a8'; ctx.fillRect(doorX, bodyY + 8, 32 * open, 66);
+      ctx.fillStyle = '#243049'; ctx.fillRect(doorX + 32 * open, bodyY + 8, 32 * (1 - open), 66);
+      ctx.fillStyle = '#0f1420'; ctx.fillRect(doorX - 2, bodyY + 8, 2, 66); ctx.fillRect(doorX + 32, bodyY + 8, 2, 66);
+      // 屋根の雪
+      ctx.fillStyle = '#eef2f8'; ctx.fillRect(cx - 2, bodyY - 6, CAR + 4, 7);
+      // 台車
+      ctx.fillStyle = '#0a0d14'; ctx.fillRect(cx + 10, y - 4, 40, 8); ctx.fillRect(cx + CAR - 50, y - 4, 40, 8);
+    }
+    // 先頭のライト（右へ進む：右端が先頭）
+    const hx = x + L - 20;
+    ctx.fillStyle = '#fff7d6'; ctx.beginPath(); ctx.arc(hx, bodyY + 40, 4, 0, 6.28); ctx.fill();
+    if (train.state !== 'stop') { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(hx, 0, hx + 420, 0); g.addColorStop(0, 'rgba(255,240,200,.35)'); g.addColorStop(1, 'rgba(255,240,200,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(hx, bodyY + 36); ctx.lineTo(hx + 420, bodyY - 30); ctx.lineTo(hx + 420, bodyY + 130); ctx.lineTo(hx, bodyY + 44); ctx.closePath(); ctx.fill(); ctx.restore(); }
+    // 尾灯
+    ctx.fillStyle = '#ff4d4d'; ctx.beginPath(); ctx.arc(x + 8, bodyY + 40, 3, 0, 6.28); ctx.fill();
+  };
+  const updateTrain = (dt) => {
+    train.t += dt;
+    if (train.state === 'wait') { train.timer -= dt; if (train.timer <= 0) { train.state = 'arrive'; train.x = -L - 100; train.v = 260; train.t = 0; } }
+    else if (train.state === 'arrive') { const d = stopX() - train.x; train.v = Math.max(18, Math.min(260, d * 0.9)); train.x += train.v * dt; if (d < 1.5) { train.x = stopX(); train.state = 'stop'; train.t = 0; } }
+    else if (train.state === 'stop') { if (train.t > 9) { train.state = 'depart'; train.t = 0; train.v = 0; } }
+    else if (train.state === 'depart') { if (train.t > 1.4) { train.v += 90 * dt; train.x += train.v * dt; } if (train.x > W + 100) { train.state = 'wait'; train.timer = 22 + Math.random() * 14; } }
+  };
+
+  // ---------- ループ ----------
+  const tempEl = document.getElementById('temp'), snowEl = document.getElementById('snow'), windEl = document.getElementById('wind'), nextEl = document.getElementById('next');
+  let t = 0, last = performance.now(), wind = 0.6, windT = 0, mouseWind = 0, depth = 0;
+  addEventListener('pointermove', (e) => { mouseWind = (e.clientX / innerWidth - 0.5) * 3; });
+  const step = (now) => {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt; windT += dt;
+    wind += ((Math.sin(windT * 0.2) * 1.2 + Math.sin(windT * 0.71) * 0.6 + mouseWind) - wind) * 0.02;
+    depth += dt * 0.004; // 積雪
+    // 背景
+    ctx.drawImage(scene, 0, 0, W, H);
+    // 遠くの雪（小さく、暗く）＋ 街灯の光の中は明るく
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    // 列車
+    updateTrain(dt); if (train.state !== 'wait') drawTrain();
+    // 街灯の光（列車より手前）
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    lamps.forEach(l => { const g = ctx.createRadialGradient(l.x, l.y, 2, l.x, l.y, 170); g.addColorStop(0, 'rgba(255,225,170,.55)'); g.addColorStop(0.25, 'rgba(255,225,170,.18)'); g.addColorStop(1, 'rgba(255,225,170,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(l.x - 14, l.y); ctx.lineTo(l.x - 120, l.y + 200); ctx.lineTo(l.x + 120, l.y + 200); ctx.lineTo(l.x + 14, l.y); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#fff3d0'; ctx.beginPath(); ctx.ellipse(l.x, l.y + 2, 10, 4, 0, 0, 6.28); ctx.fill(); });
+    ctx.restore();
+    // 息（人影）
+    const hx = W * 0.42 + 100, by = G - 28; if (Math.sin(t * 0.9) > 0.6) { ctx.fillStyle = `rgba(255,255,255,${(Math.sin(t * 0.9) - 0.6) * 0.5})`; ctx.beginPath(); ctx.arc(hx + 12 + (Math.sin(t * 0.9) - 0.6) * 30, by - 50 - (Math.sin(t * 0.9) - 0.6) * 20, 6 + (Math.sin(t * 0.9) - 0.6) * 20, 0, 6.28); ctx.fill(); }
+    // 雪
+    for (const f of flakes) {
+      f.y += (f.s * 40 + 20) * dt * (0.5 + f.z); f.x += (wind * 30 * (0.3 + f.z) + Math.sin(t * 1.5 + f.ph) * 12) * dt;
+      if (f.y > H + 6) { f.y = -6; f.x = Math.random() * (W + 200) - 100; } if (f.x > W + 100) f.x = -100; if (f.x < -100) f.x = W + 100;
+      let a = 0.35 + f.z * 0.5;
+      // 街灯の光の中なら明るく
+      for (const l of lamps) { const dx = f.x - l.x, dy = f.y - l.y; if (dy > 0 && dy < 200 && Math.abs(dx) < 14 + dy * 0.53) { a = Math.min(1, a + 0.5 * (1 - dy / 200)); break; } }
+      ctx.fillStyle = `rgba(240,245,255,${a})`;
+      ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, 6.28); ctx.fill();
+    }
+    // 手前の大きなボケた雪
+    ctx.save(); ctx.filter = 'blur(2px)'; ctx.fillStyle = 'rgba(240,245,255,.35)';
+    for (let i = 0; i < 24; i++) { const f = flakes[i * 50]; if (!f) break; ctx.beginPath(); ctx.arc((f.x * 1.7) % (W + 100), (f.y * 1.5) % (H + 40), 5 + f.z * 4, 0, 6.28); ctx.fill(); }
+    ctx.restore();
+    // 手前の積雪（下端）
+    ctx.fillStyle = '#eef2f8'; ctx.beginPath(); ctx.moveTo(0, H); for (let x = 0; x <= W; x += 30) ctx.lineTo(x, H - 26 - Math.sin(x * 0.02) * 6 - Math.sin(x * 0.07) * 3 - Math.min(30, depth * 6)); ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+    // ビネット
+    const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.95); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.55)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+    // HUD
+    tempEl.textContent = (-4 - Math.sin(t * 0.05) * 0.6).toFixed(1); snowEl.textContent = (42 + depth).toFixed(0); windEl.textContent = Math.abs(wind).toFixed(1);
+    nextEl.textContent = train.state === 'wait' ? `${Math.ceil(train.timer)} 秒後` : train.state === 'arrive' ? '到着します' : train.state === 'stop' ? `停車中　発車まで ${Math.max(0, 9 - train.t).toFixed(0)} 秒` : '発車';
+    requestAnimationFrame(step);
+  };
+  resize(); addEventListener('resize', () => { resize(); initSnow(); });
+  requestAnimationFrame(step);
+})();
+</script>
+</body>
+</html>
