@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>隅田川花火大会</title>
+<meta name="description" content="夏の夜、川面に映る花火。クリックで打ち上げる。菊・牡丹・柳・千輪。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=IBM+Plex+Mono:wght@300;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: #000; }
+  body { font-family: "Shippori Mincho", serif; color: #f2ead8; user-select: none; -webkit-user-select: none; touch-action: none; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: crosshair; }
+  .hud { position: fixed; inset: 0; pointer-events: none; }
+  .hud > * { position: absolute; }
+  .t { left: 26px; top: 22px; }
+  .t h1 { font-size: 26px; letter-spacing: .35em; font-weight: 700; text-shadow: 0 0 20px rgba(255,180,100,.35); }
+  .t p { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .28em; color: rgba(242,234,216,.6); margin-top: 6px; }
+  .n { right: 26px; top: 22px; text-align: right; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .22em; color: rgba(242,234,216,.6); line-height: 1.9; }
+  .n b { color: #f2ead8; font-weight: 500; }
+  .now { left: 50%; bottom: 84px; transform: translateX(-50%); text-align: center; white-space: nowrap; }
+  .now .no { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .3em; color: #ffb86b; }
+  .now .name { font-size: 24px; letter-spacing: .3em; margin-top: 6px; text-shadow: 0 0 24px rgba(255,180,100,.4); opacity: 0; transition: opacity .6s; }
+  .now .name.on { opacity: 1; }
+  .prog { left: 26px; bottom: 26px; pointer-events: auto; display: flex; gap: 8px; flex-wrap: wrap; max-width: 60vw; }
+  .prog button { font: inherit; font-size: 12px; letter-spacing: .2em; color: rgba(242,234,216,.85); background: rgba(0,0,0,.35); border: 1px solid rgba(242,234,216,.28); padding: 7px 12px; cursor: pointer; backdrop-filter: blur(4px); }
+  .prog button:hover { border-color: #ffb86b; color: #ffb86b; }
+  .prog button.on { background: #f2ead8; color: #111; border-color: #f2ead8; }
+  .hint { right: 26px; bottom: 26px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .25em; color: rgba(242,234,216,.5); text-align: right; line-height: 1.9; }
+  .snd { pointer-events: auto; right: 26px; bottom: 74px; font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .25em; color: rgba(242,234,216,.7); background: transparent; border: 1px solid rgba(242,234,216,.28); padding: 6px 10px; cursor: pointer; }
+  @media (max-width: 720px) { .hint { display: none; } .now .name { font-size: 18px; } .prog { max-width: 70vw; } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hud">
+  <div class="t"><h1>隅田川花火大会</h1><p>SUMIDA RIVER FIREWORKS · CANVAS</p></div>
+  <div class="n">打上 <b id="cnt">0</b> 発<br>粒子 <b id="pc">0</b><br>風 <b id="wind">0.0</b> m/s</div>
+  <div class="now"><div class="no" id="no">プログラム</div><div class="name" id="name"></div></div>
+  <div class="prog" id="prog"></div>
+  <button class="snd" id="snd">音 OFF</button>
+  <div class="hint">クリック＝打ち上げ　　長押し＝連発<br>下のボタンで玉の種類</div>
+</div>
+
+<script>
+(() => {
+  const cv = document.getElementById('c'), ctx = cv.getContext('2d', { alpha: false });
+  let W, H, dpr, horizon;
+  const sky = document.createElement('canvas'), sctx = sky.getContext('2d');
+  const resize = () => { dpr = Math.min(1.5, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); sky.width = W * dpr; sky.height = H * dpr; sctx.setTransform(dpr, 0, 0, dpr, 0, 0); horizon = H * 0.72; drawBackdrop(); };
+
+  // ---------- 玉の種類 ----------
+  const shells = [
+    { key: 'kiku', name: '菊', full: '昇り曲付 菊先紅光露', n: 320, spd: 7.5, trail: true, colors: ['#ffd27a', '#ff6b3d', '#ffe9b0'], twinkle: true },
+    { key: 'botan', name: '牡丹', full: '五重芯 変化牡丹', n: 420, spd: 7.0, trail: false, colors: ['#ff5c8a', '#ffd166', '#6be1ff', '#a3ff8f', '#ffffff'], rings: 3 },
+    { key: 'yanagi', name: '柳', full: '錦冠 しだれ柳', n: 260, spd: 4.8, trail: true, colors: ['#ffb347', '#ffd98a'], willow: true },
+    { key: 'senrin', name: '千輪', full: '八重芯 千輪菊', n: 26, spd: 5.5, trail: false, colors: ['#ffffff'], senrin: true },
+    { key: 'shidare', name: '冠', full: '銀冠 金冠菊', n: 380, spd: 6.2, trail: true, colors: ['#e8f1ff', '#ffe8a8'], crown: true },
+  ];
+  let shellIdx = 0;
+  const progEl = document.getElementById('prog');
+  shells.forEach((s, i) => { const b = document.createElement('button'); b.textContent = s.name; b.classList.toggle('on', i === 0); b.addEventListener('click', () => { shellIdx = i; [...progEl.children].forEach((x, k) => x.classList.toggle('on', k === i)); }); progEl.appendChild(b); });
+
+  // ---------- 音 ----------
+  let ac = null, soundOn = false;
+  const sndBtn = document.getElementById('snd');
+  sndBtn.addEventListener('click', () => { soundOn = !soundOn; if (soundOn && !ac) ac = new (window.AudioContext || window.webkitAudioContext)(); if (ac && ac.state === 'suspended') ac.resume(); sndBtn.textContent = soundOn ? '音 ON' : '音 OFF'; });
+  const whistle = () => { if (!soundOn || !ac) return; const t = ac.currentTime; const o = ac.createOscillator(), g = ac.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(600, t); o.frequency.exponentialRampToValueAtTime(1400, t + 1.1); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.05, t + 0.1); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.2); o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 1.25); };
+  const boom = (size = 1) => { if (!soundOn || !ac) return; const t = ac.currentTime; const len = 1.6 * size; const buf = ac.createBuffer(1, ac.sampleRate * len, ac.sampleRate); const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 2.2); const s = ac.createBufferSource(); s.buffer = buf; const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(900, t); f.frequency.exponentialRampToValueAtTime(80, t + len); const g = ac.createGain(); g.gain.value = 0.6 * size; s.connect(f); f.connect(g); g.connect(ac.destination); s.start(t + 0.05); };
+
+  // ---------- 背景（一度だけ描く） ----------
+  const bg = document.createElement('canvas'), bctx = bg.getContext('2d');
+  const drawBackdrop = () => {
+    bg.width = W; bg.height = H;
+    const g = bctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#02030a'); g.addColorStop(0.55, '#070a1c'); g.addColorStop(0.72, '#120c1a'); g.addColorStop(1, '#03040a');
+    bctx.fillStyle = g; bctx.fillRect(0, 0, W, H);
+    // 星
+    for (let i = 0; i < 160; i++) { bctx.fillStyle = `rgba(255,255,255,${Math.random() * .5 + .1})`; bctx.fillRect(Math.random() * W, Math.random() * horizon * .8, 1, 1); }
+    // 遠景ビル
+    let x = 0; const seed = (n) => { const v = Math.sin(n * 91.7) * 43758.5; return v - Math.floor(v); };
+    let k = 0; while (x < W) { const w = 18 + seed(k) * 50, h = 30 + seed(k + 7) * 120; bctx.fillStyle = '#0b0d1a'; bctx.fillRect(x, horizon - h, w, h); for (let wy = horizon - h + 6; wy < horizon - 4; wy += 9) for (let wx = x + 3; wx < x + w - 4; wx += 7) if (seed(wx * 3 + wy) > .55) { bctx.fillStyle = `rgba(255,${190 + seed(wx + wy) * 50 | 0},120,${.25 + seed(wy) * .4})`; bctx.fillRect(wx, wy, 3, 4); } x += w + 4 + seed(k + 3) * 10; k++; }
+    // 東京スカイツリー風の塔
+    const tx = W * 0.78; bctx.fillStyle = '#0e1122'; bctx.beginPath(); bctx.moveTo(tx - 14, horizon); bctx.lineTo(tx - 4, horizon - 300); bctx.lineTo(tx + 4, horizon - 300); bctx.lineTo(tx + 14, horizon); bctx.closePath(); bctx.fill();
+    bctx.fillStyle = 'rgba(160,200,255,.7)'; bctx.fillRect(tx - 12, horizon - 220, 24, 3); bctx.fillRect(tx - 8, horizon - 250, 16, 2); bctx.fillStyle = '#ff5a5a'; bctx.fillRect(tx - 1, horizon - 304, 2, 4);
+    // 橋
+    bctx.strokeStyle = '#1b1a2a'; bctx.lineWidth = 10; bctx.beginPath(); bctx.moveTo(0, horizon - 2); bctx.lineTo(W, horizon - 2); bctx.stroke();
+    bctx.strokeStyle = 'rgba(255,200,120,.7)'; bctx.lineWidth = 1; for (let i = 0; i < W; i += 26) { bctx.fillStyle = 'rgba(255,210,140,.9)'; bctx.fillRect(i, horizon - 14, 2, 2); }
+    bctx.strokeStyle = '#151428'; bctx.lineWidth = 3; bctx.beginPath(); for (let i = 0; i <= W; i += 4) { const y = horizon - 12 - Math.abs(Math.sin(i / W * Math.PI * 3)) * 40; bctx.lineTo(i, y); } bctx.stroke();
+    // 川
+    const wg = bctx.createLinearGradient(0, horizon, 0, H); wg.addColorStop(0, '#0a0e22'); wg.addColorStop(1, '#03040c'); bctx.fillStyle = wg; bctx.fillRect(0, horizon, W, H - horizon);
+    // 手前の観客シルエット
+    bctx.fillStyle = '#000';
+    for (let i = -20; i < W + 20; i += 14 + Math.random() * 10) { const h = 26 + Math.random() * 24; bctx.beginPath(); bctx.arc(i, H - h, 7 + Math.random() * 3, 0, 6.28); bctx.fill(); bctx.fillRect(i - 9, H - h + 6, 18, h); }
+    bctx.fillRect(0, H - 8, W, 8);
+    // 提灯
+    for (let i = 40; i < W; i += 90) { bctx.fillStyle = 'rgba(255,120,60,.9)'; bctx.beginPath(); bctx.ellipse(i, H - 70, 7, 10, 0, 0, 6.28); bctx.fill(); bctx.fillStyle = 'rgba(255,140,80,.18)'; bctx.beginPath(); bctx.arc(i, H - 70, 26, 0, 6.28); bctx.fill(); }
+  };
+
+  // ---------- 粒子 ----------
+  const rockets = [], parts = [];
+  let wind = 0, windT = 0, count = 0;
+  const cntEl = document.getElementById('cnt'), pcEl = document.getElementById('pc'), windEl = document.getElementById('wind'), nameEl = document.getElementById('name'), noEl = document.getElementById('no');
+  const hex = (h) => [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
+
+  const launch = (x, shell) => {
+    rockets.push({ x, y: H - 30, vx: (Math.random() - .5) * 0.6 + wind * 0.02, vy: -(8.6 + Math.random() * 1.8) * (H / 800), shell, trail: [], life: 0 });
+    whistle();
+  };
+  const burst = (x, y, shell, scale = 1, gen = 0) => {
+    boom(scale);
+    if (gen === 0) { count++; cntEl.textContent = count; noEl.textContent = `第 ${count} 号`; nameEl.textContent = shell.full; nameEl.classList.add('on'); clearTimeout(nameEl._t); nameEl._t = setTimeout(() => nameEl.classList.remove('on'), 2600); }
+    const n = Math.round(shell.n * scale);
+    if (shell.senrin && gen === 0) {
+      for (let i = 0; i < n; i++) { const a = Math.random() * 6.28, s = shell.spd * (0.5 + Math.random() * 0.5); parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, c: hex('#ffd9a0'), life: 1, decay: 0.012 + Math.random() * 0.006, r: 1.6, trail: false, child: shell, fuse: 40 + Math.random() * 25 }); }
+      return;
+    }
+    const rings = shell.rings || 1;
+    for (let r = 0; r < rings; r++) {
+      const col = hex(shell.colors[r % shell.colors.length]);
+      const spd = shell.spd * (1 - r * 0.28) * scale;
+      const cnt = Math.round(n / rings);
+      for (let i = 0; i < cnt; i++) {
+        const a = (i / cnt) * 6.28 + Math.random() * 0.05, s = spd * (0.92 + Math.random() * 0.16);
+        const c = shell.rings ? col : hex(shell.colors[Math.floor(Math.random() * shell.colors.length)]);
+        parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, c, life: 1, decay: shell.willow ? 0.0045 + Math.random() * 0.003 : shell.crown ? 0.006 + Math.random() * 0.004 : 0.011 + Math.random() * 0.008, r: shell.willow ? 1.4 : 1.8, trail: shell.trail, willow: shell.willow, crown: shell.crown, twinkle: shell.twinkle, drag: shell.willow ? 0.975 : 0.965 });
+      }
+    }
+  };
+
+  let t = 0, last = performance.now();
+  const step = (now) => {
+    const dt = Math.min(2, (now - last) / 16.67); last = now; t += dt / 60;
+    windT += dt / 60; wind += ((Math.sin(windT * 0.13) * 1.8 + Math.sin(windT * 0.37) * 0.8) - wind) * 0.01; windEl.textContent = Math.abs(wind).toFixed(1);
+    // 空のレイヤーは残像を残す（黒で薄く塗る）
+    sctx.globalCompositeOperation = 'source-over'; sctx.fillStyle = 'rgba(0,0,0,0.22)'; sctx.fillRect(0, 0, W, H);
+    sctx.globalCompositeOperation = 'lighter';
+    // 打上
+    for (let i = rockets.length - 1; i >= 0; i--) {
+      const r = rockets[i]; r.x += r.vx * dt; r.y += r.vy * dt; r.vy += 0.085 * dt * (H / 800); r.life += dt;
+      sctx.fillStyle = 'rgba(255,200,140,.9)'; sctx.beginPath(); sctx.arc(r.x, r.y, 1.6, 0, 6.28); sctx.fill();
+      sctx.fillStyle = 'rgba(255,160,80,.35)'; sctx.beginPath(); sctx.arc(r.x + (Math.random() - .5) * 3, r.y + 6, 2.2, 0, 6.28); sctx.fill();
+      if (r.vy > -1.2) { rockets.splice(i, 1); burst(r.x, r.y, r.shell, 1); }
+    }
+    // 粒子
+    const g = 0.055 * dt;
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.vx = p.vx * Math.pow(p.drag || 0.965, dt) + wind * 0.004 * dt; p.vy = p.vy * Math.pow(p.drag || 0.965, dt) + g * (p.willow ? 1.3 : 1);
+      p.x += p.vx * dt; p.y += p.vy * dt; p.life -= p.decay * dt;
+      if (p.child) { p.fuse -= dt; if (p.fuse <= 0) { parts.splice(i, 1); burst(p.x, p.y, { n: 60, spd: 2.6, colors: ['#ff6b8a', '#6be1ff', '#ffd166', '#a3ff8f', '#ffffff'], trail: false }, 1, 1); continue; } }
+      if (p.life <= 0 || p.y > H) { parts.splice(i, 1); continue; }
+      let a = p.life;
+      if (p.twinkle && p.life < 0.5) a *= Math.random() < 0.5 ? 1 : 0.2;
+      if (p.crown && p.life < 0.6) a *= 0.5 + 0.5 * Math.sin(t * 40 + i);
+      const [R, G, B] = p.c;
+      if (p.trail) { sctx.strokeStyle = `rgba(${R},${G},${B},${a * 0.8})`; sctx.lineWidth = p.r; sctx.beginPath(); sctx.moveTo(p.x - p.vx * 2.2 * dt, p.y - p.vy * 2.2 * dt); sctx.lineTo(p.x, p.y); sctx.stroke(); }
+      else { sctx.fillStyle = `rgba(${R},${G},${B},${a})`; sctx.beginPath(); sctx.arc(p.x, p.y, p.r, 0, 6.28); sctx.fill(); }
+    }
+    pcEl.textContent = parts.length.toLocaleString();
+
+    // 合成：背景 → 空レイヤー → 川面の反射
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(bg, 0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.drawImage(sky, 0, 0, W, H);
+    // 反射：空を上下反転し、横に揺らして川へ
+    ctx.save(); ctx.beginPath(); ctx.rect(0, horizon, W, H - horizon); ctx.clip(); ctx.globalAlpha = 0.7; ctx.globalCompositeOperation = 'lighter';
+    const strip = 4;
+    for (let y = horizon; y < H; y += strip) {
+      const d = (y - horizon) / (H - horizon);
+      const srcY = horizon - (y - horizon) * 1.15; if (srcY < 0) break;
+      const off = Math.sin(y * 0.09 + t * 2.4) * (2 + d * 9) + Math.sin(y * 0.031 - t * 1.1) * (1 + d * 5);
+      ctx.drawImage(sky, 0, srcY * dpr, W * dpr, strip * dpr, off, y, W, strip);
+    }
+    ctx.restore();
+    // 川面の薄い光の帯
+    ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    // 自動打上
+    if (Math.random() < 0.012 * dt && rockets.length < 3) launch(W * (0.2 + Math.random() * 0.6), shells[Math.floor(Math.random() * shells.length)]);
+    requestAnimationFrame(step);
+  };
+
+  // ---------- 入力 ----------
+  let hold = null;
+  const fire = (x) => launch(Math.min(W - 40, Math.max(40, x)), shells[shellIdx]);
+  cv.addEventListener('pointerdown', (e) => { if (soundOn && ac && ac.state === 'suspended') ac.resume(); fire(e.clientX); hold = setInterval(() => fire(e.clientX + (Math.random() - .5) * 200), 260); });
+  const stopHold = () => { clearInterval(hold); hold = null; };
+  cv.addEventListener('pointerup', stopHold); cv.addEventListener('pointercancel', stopHold); cv.addEventListener('pointerleave', stopHold);
+
+  resize(); addEventListener('resize', resize);
+  requestAnimationFrame(step);
+  setTimeout(() => launch(W * 0.5, shells[0]), 500);
+  setTimeout(() => launch(W * 0.35, shells[1]), 1400);
+  setTimeout(() => launch(W * 0.65, shells[2]), 2300);
+})();
+</script>
+</body>
+</html>
