@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%2311191c' d='M0 0h32v32H0z'/%3E%3Cpath fill='%23d0b87a' d='m16 3 11 6v14l-11 6-11-6V9zm0 5-7 4v8l7 4 7-4v-8z'/%3E%3C/svg%3E">
+<title>万華鏡室 — 百景 013 / Astra 完成候補</title>
+<style>
+:root{--ink:#efebda;--dim:#a1a49f;--gold:#c5ae78;--line:#ffffff26;--serif:"Hiragino Mincho ProN","Yu Mincho","Noto Serif CJK JP",serif;--sans:"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans CJK JP",sans-serif}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#101517;color:var(--ink)}body{font-family:var(--sans);font-weight:400;overflow-x:hidden}button,a{-webkit-tap-highlight-color:transparent}button{font:inherit;color:inherit}button:focus-visible,a:focus-visible, #touch:focus-visible{outline:2px solid #f1d59b;outline-offset:7px}button{cursor:pointer}button:disabled{cursor:wait}a{color:inherit;text-decoration:none}
+.room{position:relative;isolation:isolate;width:100%;height:100svh;min-height:660px;overflow:hidden;background:radial-gradient(ellipse at 45% 45%,#26373860,transparent 63%),linear-gradient(123deg,#182125,#101719 65%,#0e1215)}
+.grain{position:absolute;inset:0;pointer-events:none;z-index:5;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E")}
+header{position:absolute;top:28px;left:36px;right:36px;display:flex;align-items:center;justify-content:space-between;z-index:6;font-size:10px;letter-spacing:.17em;color:#adb1a9}.home{display:flex;align-items:center;gap:13px}.home b{font-family:var(--serif);font-size:19px;font-weight:400;letter-spacing:.15em;color:var(--ink)}.home span{font-size:15px;color:var(--gold)}.provenance{display:flex;gap:20px;align-items:center}.provenance span+span{padding-left:20px;border-left:1px solid var(--line)}
+.title{position:absolute;z-index:3;left:78%;top:23%;margin:0;writing-mode:vertical-rl;text-orientation:upright;font-family:var(--serif);font-size:clamp(38px,4.3vw,67px);font-weight:400;letter-spacing:.28em;line-height:1.5;pointer-events:none}.subtitle{position:absolute;z-index:3;left:87%;top:24%;writing-mode:vertical-rl;font-family:var(--serif);font-size:12px;letter-spacing:.27em;color:#aaa997;line-height:2.4;margin:0;pointer-events:none}.english{position:absolute;z-index:3;left:calc(78% + 11px);top:calc(23% + 375px);font-size:9px;letter-spacing:.27em;color:var(--gold)}
+.margin-note{position:absolute;z-index:3;left:37px;top:42%;writing-mode:vertical-rl;font-size:9px;letter-spacing:.19em;color:#84908c;display:flex;gap:22px}.margin-note:before{content:"";width:1px;height:50px;background:#8c9a886b;align-self:center}
+#glass{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}#touch{position:absolute;z-index:2;border-radius:50%;touch-action:none;cursor:grab;outline-offset:3px}#touch.dragging{cursor:grabbing}
+.controls{position:absolute;z-index:6;bottom:32px;left:9%;width:65%;display:flex;flex-direction:column;align-items:center;gap:21px}.instruction{font-family:var(--serif);font-size:12px;letter-spacing:.15em;color:#c8c9b9;margin:0}.action-row{display:flex;align-items:center;justify-content:center;gap:0}.action-row button{border:0;background:transparent;padding:9px 25px;font-size:11px;letter-spacing:.08em;min-height:42px;display:flex;align-items:center;gap:10px;color:#c5c8bc;transition:color .2s}.action-row button+button{border-left:1px solid #d0d7bd29}.action-row button:hover{color:#fff5d7}.action-row button span{font-size:18px;color:#d1ba82;font-family:serif}.action-row button[aria-pressed=true]{color:#f5d595}.action-row button.primary{color:#f0e8d0}.key-tip{position:absolute;right:35px;bottom:37px;text-align:right;color:#89948c;font-size:9px;letter-spacing:.04em;line-height:2}.key-tip kbd{font:inherit;color:#b6bdaf}.state{position:absolute;left:10%;bottom:175px;pointer-events:none;display:flex;align-items:center;gap:10px;font-size:9px;letter-spacing:.18em;color:#8e9e94}.state:before{content:"";width:4px;height:4px;border-radius:50%;background:#d1bc7e;box-shadow:0 0 9px #e2c77988}.index{font-family:Georgia,serif;position:absolute;right:36px;bottom:126px;line-height:1;font-size:57px;font-weight:400;color:#e6dfc7}.index small{font-family:var(--sans);display:block;font-size:8px;letter-spacing:.18em;color:#98a297;margin-top:12px;text-align:right}.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(min-width:1500px){.english{top:calc(23% + 425px)}}
+@media(max-width:800px){.room{min-height:730px}header{left:23px;right:23px;top:23px}.provenance{gap:12px}.provenance span+span{padding-left:12px}.title{left:9%;top:12%;writing-mode:horizontal-tb;letter-spacing:.14em;font-size:34px;line-height:1.4}.subtitle{left:auto;right:8%;top:12%;font-size:10px;letter-spacing:.2em}.english{left:9%;top:calc(12% + 58px);font-size:8px;letter-spacing:.18em}.margin-note{display:none}.controls{left:4%;width:92%;bottom:32px;gap:18px}.action-row button{padding:9px 16px;font-size:10px;gap:7px}.instruction{font-size:11px;letter-spacing:.06em}.state{left:9%;bottom:168px;font-size:8px}.index{right:8%;bottom:154px;font-size:35px}.index small{font-size:7px;margin-top:7px}.key-tip{display:none}}
+@media(max-width:360px){.action-row button{padding:9px 10px}.provenance{font-size:8px}.title{font-size:31px}.instruction{font-size:10px}.room{min-height:695px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.piece-tools{display:flex;align-items:center;gap:9px;font-size:10px;color:#d6d4ba}.piece-tools[hidden]{display:none}.piece-tools button{background:transparent;border:1px solid #aaa08055;min-height:36px;min-width:32px;border-radius:2px;font-size:13px}.piece-tools #place-piece{padding:0 10px;font-size:10px}.piece-tools small{font-size:8px;color:#97aaa4}.save{position:absolute;right:36px;bottom:245px;background:none;border:0;border-bottom:1px solid #b3a47755;padding:10px 0;z-index:6;font-size:10px;color:#c4ba99;letter-spacing:.08em}
+@media(max-width:800px){.save{top:185px;right:8%;bottom:auto;font-size:9px}.controls{gap:13px;bottom:25px}.piece-tools{gap:7px}.piece-tools small{display:none}.room.is-open .instruction{font-size:10px}.room.is-open .state{bottom:201px}.room.is-open .index{bottom:191px}}
+</style>
+</head>
+<body>
+<main class="room">
+ <header><a class="home" href="../index.html" aria-label="百景のギャラリーへ"><span>←</span><b>百景</b></a><div class="provenance"><span>013 / 100</span><span>ASTRA · 013</span></div></header>
+ <h1 class="title">万華鏡室</h1>
+ <p class="subtitle">同じ景色には、<br>もう戻れない。</p>
+ <span class="english" lang="en">THE KALEIDOSCOPE ROOM</span>
+ <div class="margin-note">光と、硝子と、ふたつの鏡。</div>
+ <canvas id="glass" aria-hidden="true"></canvas>
+ <div id="touch" tabindex="0" role="img" aria-label="色硝子の万華鏡。ドラッグまたは左右の矢印で回す。Enterで硝子の部屋を開く。" aria-describedby="instruction"></div>
+ <div class="state" id="state">鏡の中</div>
+ <div class="index"><span id="scene">01</span><small>GLASS COMPOSITION</small></div>
+ <div class="controls">
+  <p class="instruction" id="instruction">硝子を転がすように、ゆっくりドラッグ。</p>
+  <div id="piece-tools" class="piece-tools" hidden><button id="prev-piece" aria-label="前の硝子を選ぶ">‹</button><span id="piece-name">硝子 08</span><button id="next-piece" aria-label="次の硝子を選ぶ">›</button><button id="place-piece">光の中へ</button><small>矢印キーで移動</small></div>
+  <div class="action-row">
+   <button id="turn" type="button" aria-label="万華鏡をひと回しする"><span aria-hidden="true">↻</span>ひと回し</button>
+   <button id="open" class="primary" type="button" aria-pressed="false"><span aria-hidden="true">◇</span><b style="font-weight:400" id="open-label">硝子を見る</b></button>
+   <button id="renew" type="button"><span aria-hidden="true">⁕</span>欠片を入れ替える</button>
+  </div>
+ </div>
+ <button id="save" class="save">この模様を残す ↗</button>
+ <div class="key-tip"><kbd>← →</kbd> 回す<br><kbd>Enter</kbd> 鏡を開く / 閉じる</div>
+ <div class="grain" aria-hidden="true"></div>
+ <p class="sr-only" role="status" id="announcement" aria-live="polite"></p>
+</main>
+<script>
+'use strict';
+(() => {
+ const canvas=document.getElementById('glass'),input=document.getElementById('touch'),ctx=canvas.getContext('2d',{alpha:false});
+ const source=document.createElement('canvas');source.width=source.height=1000;
+ let s=source.getContext('2d');
+ const ring=document.createElement('canvas');
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+ const TAU=Math.PI*2,sector=Math.PI/6;
+ const palette=[['#075360','#45d0bf','#c6ffe2'],['#772d41','#ed8074','#ffceae'],['#785221','#e6bf65','#fff4c4'],['#233768','#658bcf','#c4eaff'],['#56346c','#b18abe','#f0d1e6'],['#28533b','#86b784','#d9f2b7']];
+ let W=0,H=0,D=1,cx=0,cy=0,R=0,turn=0,angular=0,open=0,targetOpen=0,raf=0,previous=0,settle=0,composition=1,seed=1375,random=()=>0,pieces=[],pointer=null,flash=0,selected=7;
+ let metrics={frames:0,gestures:0,turns:0,opened:0,renewed:0};
+ function rng(n){return()=>{n|=0;n=n+0x6D2B79F5|0;let t=Math.imul(n^n>>>15,1|n);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+ const mix=(a,b,t)=>a+(b-a)*t;
+ function path(g,points){g.beginPath();points.forEach((p,i)=>i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]));g.closePath();}
+ function makeGlass(){
+  random=rng(seed);pieces=[];
+  for(let i=0;i<67;i++){
+   const angle=random()*TAU,rad=Math.sqrt(random())*.87,r=.065+random()*.095;
+   const n=4+Math.floor(random()*4),points=[];
+   for(let j=0;j<n;j++){const a=TAU*j/n,rr=r*(.67+random()*.33);points.push([Math.cos(a)*rr,Math.sin(a)*rr]);}
+   const facets=points.map(()=>random());
+   pieces.push({x:Math.cos(angle)*rad,y:Math.sin(angle)*rad,r,points,facets,vx:0,vy:0,angle:random()*TAU,spin:0,color:palette[(i+Math.floor(random()*3))%palette.length],type:i%17===0?'ring':i%13===7?'bead':'shard'});
+  }
+  // A small central constellation keeps the first view legible before the first turn.
+  pieces[0].x=.035;pieces[0].y=.02;pieces[0].r=.085;
+  pieces.forEach(buildSprite);settle=reduced.matches?0:1.9;flash=reduced.matches?0:.18;
+ }
+ function drawPiece(p){
+  s.save();s.translate(p.x,p.y);s.rotate(p.angle);
+  const r=p.r,c=p.color;
+  const shape=()=>{if(p.type==='bead'){s.beginPath();s.ellipse(0,0,r,r*.76,0,0,TAU);}else path(s,p.points);};
+  s.shadowColor=c[0]+'55';s.shadowBlur=5;s.shadowOffsetX=1;s.shadowOffsetY=3;
+  if(p.type==='ring'){
+   const g=s.createLinearGradient(-r,-r,r,r);g.addColorStop(0,c[2]);g.addColorStop(.16,c[1]+'80');g.addColorStop(.5,c[0]+'cb');g.addColorStop(.7,c[2]+'b0');g.addColorStop(1,c[1]);
+   s.lineWidth=r*.15;s.strokeStyle=g;s.beginPath();s.ellipse(0,0,r,r*.8,0,0,TAU);s.stroke();s.shadowBlur=0;
+   s.lineWidth=.0025;s.strokeStyle='#ffffe3d0';s.beginPath();s.ellipse(0,0,r*.95,r*.75,0,3.2,5.4);s.stroke();
+  }else{
+   shape();const g=s.createLinearGradient(-r,-r,r,r);g.addColorStop(0,c[2]+'f0');g.addColorStop(.1,c[1]+'c0');g.addColorStop(.42,c[0]+'a0');g.addColorStop(.72,c[1]+'6a');g.addColorStop(.93,c[2]+'d0');g.addColorStop(1,c[0]+'ee');s.fillStyle=g;s.fill();s.shadowBlur=0;s.shadowOffsetX=s.shadowOffsetY=0;
+   s.save();shape();s.clip();
+   const glow=s.createRadialGradient(r*.3,r*.42,r*.04,r*.1,r*.2,r*1.1);glow.addColorStop(0,c[2]+'bc');glow.addColorStop(.28,c[1]+'22');glow.addColorStop(1,c[0]+'00');s.fillStyle=glow;s.fillRect(-r,-r,r*2,r*2);
+   s.strokeStyle=c[2]+'bb';s.lineWidth=r*.025;s.beginPath();s.moveTo(-r*.83,-r*.42);s.bezierCurveTo(-r*.05,-r*.8,r*.07,r*.05,r*.73,r*.4);s.stroke();
+   s.strokeStyle=c[2]+'59';s.lineWidth=r*.06;s.beginPath();s.moveTo(-r*.72,-r*.6);s.bezierCurveTo(-r*.1,-r*.2,-r*.12,r*.5,r*.64,r*.56);s.stroke();
+   for(let j=0;j<5;j++){const q=p.facets[j%p.facets.length],x=(q-.5)*r*1.2,y=(p.facets[(j+2)%p.facets.length]-.5)*r; s.strokeStyle='#effee963';s.lineWidth=.0014;s.beginPath();s.ellipse(x,y,r*(.012+q*.02),r*(.022+q*.03),.4,0,TAU);s.stroke();}
+   s.restore();shape();s.strokeStyle=c[0]+'d0';s.lineWidth=.004;s.stroke();
+   s.save();s.scale(.955,.955);shape();s.strokeStyle=c[2]+'b8';s.lineWidth=.004;s.stroke();s.restore();
+   s.save();s.scale(.89,.89);shape();s.strokeStyle=c[1]+'80';s.lineWidth=.005;s.stroke();s.restore();
+   s.strokeStyle='#fff8dddf';s.lineWidth=.0027;s.beginPath();if(p.type==='bead')s.ellipse(0,0,r*.91,r*.69,0,3.6,5.08);else{s.moveTo(...p.points[0]);s.lineTo(...p.points[1]);}s.stroke();
+  }
+  s.restore();
+ }
+ function buildSprite(p){
+  const prior=s,c=document.createElement('canvas');c.width=c.height=192;s=c.getContext('2d');const rr=p.r*1.3;s.translate(96,96);s.scale(96/rr,96/rr);drawPiece({...p,x:0,y:0,angle:0});s=prior;p.sprite=c;p.spriteR=rr;
+ }
+ function texture(){
+  s.setTransform(1,0,0,1,0,0);s.clearRect(0,0,1000,1000);
+  const bg=s.createRadialGradient(450,380,20,500,500,530);bg.addColorStop(0,'#719797');bg.addColorStop(.56,'#365967');bg.addColorStop(1,'#142b3e');
+  s.fillStyle=bg;s.fillRect(0,0,1000,1000);
+  s.translate(500,500);s.scale(470,470);s.rotate(turn);
+  for(const p of pieces){s.save();s.translate(p.x,p.y);s.rotate(p.angle);s.drawImage(p.sprite,-p.spriteR,-p.spriteR,p.spriteR*2,p.spriteR*2);s.restore();}
+  s.setTransform(1,0,0,1,0,0);
+  // Sparse imperfections in the glass, deliberately fixed to the material.
+  const speck=rng(611);s.fillStyle='#f2eac6';
+  for(let i=0;i<460;i++){s.globalAlpha=.04+speck()*.08;s.fillRect(speck()*1000,speck()*1000,.3+speck()*1.2,.3+speck()*1.2);}s.globalAlpha=1;
+ }
+ function buildRing(){
+  const pad=1.115,size=Math.ceil(R*2*pad*D);ring.width=ring.height=size;
+  const g=ring.getContext('2d');g.translate(size/2,size/2);g.scale(R*D,R*D);
+  g.shadowBlur=40*D;g.shadowColor='#000b';g.shadowOffsetY=19*D;
+  g.beginPath();g.arc(0,0,1.055,0,TAU);g.fillStyle='#111819';g.fill();g.shadowBlur=0;g.shadowOffsetY=0;
+  let metal=g.createLinearGradient(-1,-1,1,1);metal.addColorStop(0,'#746c4d');metal.addColorStop(.15,'#c0ad78');metal.addColorStop(.24,'#414a40');metal.addColorStop(.45,'#1b292a');metal.addColorStop(.69,'#5f6049');metal.addColorStop(.82,'#b2a576');metal.addColorStop(1,'#273a36');
+  g.strokeStyle=metal;g.lineWidth=.046;g.beginPath();g.arc(0,0,1.036,0,TAU);g.stroke();
+  g.lineWidth=.002;g.strokeStyle='#ded3a960';
+  [1.064,1.014,1.006,.99].forEach(r=>{g.beginPath();g.arc(0,0,r,0,TAU);g.stroke();});
+  for(let i=0;i<180;i++){
+   const a=i/180*TAU,r=i%5===0?1.039:1.045;
+   g.strokeStyle=i%5===0?'#d6ce9e94':'#c1b8904d';g.lineWidth=.0011;
+   g.beginPath();g.moveTo(Math.cos(a)*r,Math.sin(a)*r);g.lineTo(Math.cos(a)*1.054,Math.sin(a)*1.054);g.stroke();
+  }
+  // Dark gasket, polished lip, and four recessed screws.
+  g.strokeStyle='#040f16';g.lineWidth=.022;g.beginPath();g.arc(0,0,.991,0,TAU);g.stroke();
+  g.strokeStyle='#9caa9388';g.lineWidth=.003;g.beginPath();g.arc(0,0,.976,0,TAU);g.stroke();
+  for(let i=0;i<4;i++){
+   const a=Math.PI/4+i*Math.PI/2;g.save();g.translate(Math.cos(a)*1.035,Math.sin(a)*1.035);g.rotate(a);
+   const screw=g.createLinearGradient(-.012,-.012,.012,.012);screw.addColorStop(0,'#b5b498');screw.addColorStop(.5,'#34423c');screw.addColorStop(1,'#697565');
+   g.fillStyle=screw;g.beginPath();g.arc(0,0,.01,0,TAU);g.fill();g.strokeStyle='#101c1b';g.lineWidth=.002;g.beginPath();g.moveTo(-.006,0);g.lineTo(.006,0);g.stroke();g.restore();
+  }
+ }
+ function resize(){
+  const rect=canvas.getBoundingClientRect();W=rect.width;H=rect.height;D=Math.min(devicePixelRatio||1,2);
+  canvas.width=Math.round(W*D);canvas.height=Math.round(H*D);
+  if(W<=800){R=Math.min(W*.421,(H-340)*.49);cx=W*.5;cy=Math.max(340,H*.495);}else{R=Math.min(H*.342,(H-265)*.5,W*.282);cx=W*.437;cy=H*.428;}
+  Object.assign(input.style,{left:(cx-R*1.13)+'px',top:(cy-R*1.13)+'px',width:(R*2.26)+'px',height:(R*2.26)+'px'});buildRing();wake();
+ }
+ function render(){
+  ctx.setTransform(D,0,0,D,0,0);ctx.fillStyle='#11191c';ctx.fillRect(0,0,W,H);
+  const aura=ctx.createRadialGradient(cx,cy,R*.3,cx,cy,R*1.7);aura.addColorStop(0,'#49615a');aura.addColorStop(.52,'#263b3b');aura.addColorStop(1,'#11191c');ctx.fillStyle=aura;ctx.fillRect(0,0,W,H);
+  // A restrained spill of glass-coloured light onto the surrounding dark surface.
+  ctx.save();ctx.globalAlpha=.1;ctx.filter='blur('+Math.max(12,R*.085)+'px)';ctx.drawImage(source,cx-R*1.12,cy-R*1.12,R*2.24,R*2.24);ctx.restore();
+  ctx.drawImage(ring,cx-ring.width/D/2,cy-ring.height/D/2,ring.width/D,ring.height/D);
+  ctx.save();ctx.translate(cx,cy);ctx.beginPath();ctx.arc(0,0,R*.976,0,TAU);ctx.clip();ctx.fillStyle='#14282b';ctx.fillRect(-R,-R,R*2,R*2);
+  if(open>.001){ctx.save();ctx.globalAlpha=open;ctx.drawImage(source,-R,-R,R*2,R*2);ctx.restore();}
+  if(open<.999){
+   for(let i=0;i<12;i++){
+    ctx.save();ctx.rotate(i*sector-Math.PI/2);ctx.translate(R*open*.48,0);ctx.scale(1-open*.22,1-open*.22);if(i%2)ctx.scale(1,-1);
+    ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R*1.03,-sector/2-.0005,sector/2+.0005);ctx.closePath();ctx.clip();ctx.globalAlpha=1-open;
+    ctx.drawImage(source,-R,-R,R*2,R*2);ctx.restore();
+   }
+  }
+  // In the open tray, light marks the exact part that the mirrors repeat.
+  if(open>.001){
+   ctx.save();ctx.globalAlpha=open;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R*.965,-sector/2,sector/2);ctx.closePath();ctx.fillStyle='#f2d69c12';ctx.fill();ctx.strokeStyle='#f5dfaa65';ctx.lineWidth=1;ctx.stroke();
+   ctx.fillStyle='#ece1c1';ctx.font=(Math.max(10,R*.026))+'px serif';ctx.textAlign='center';ctx.fillText('鏡に映るところ',R*.58,-R*.23);ctx.restore();
+  }
+  if(open>.99&&selected>=0){const p=pieces[selected],x=(p.x*Math.cos(turn)-p.y*Math.sin(turn))*R*.94,y=(p.x*Math.sin(turn)+p.y*Math.cos(turn))*R*.94;ctx.save();ctx.strokeStyle='#fff4ce';ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.beginPath();ctx.arc(x,y,p.r*R*1.2,0,TAU);ctx.stroke();ctx.restore();}
+  // Reflection on the front lens; it never obscures the changing object below.
+  const lens=ctx.createRadialGradient(-R*.3,-R*.42,R*.06,0,0,R);lens.addColorStop(0,'#ffefc008');lens.addColorStop(.72,'#00151b00');lens.addColorStop(.95,'#030d1440');lens.addColorStop(1,'#030d14d0');ctx.fillStyle=lens;ctx.fillRect(-R,-R,R*2,R*2);
+  ctx.strokeStyle='#bfe0d722';ctx.lineWidth=1.3;ctx.beginPath();ctx.arc(0,0,R*.96,3.63,4.75);ctx.stroke();
+  if(flash>0){ctx.fillStyle='rgba(232,230,185,'+flash+')';ctx.fillRect(-R,-R,R*2,R*2);}
+  ctx.restore();
+  // The notch is coupled to the rotation, not a free-running decoration.
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(turn);ctx.strokeStyle='#eee0af';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,-R*1.075);ctx.lineTo(0,-R*1.092);ctx.stroke();ctx.restore();
+  metrics.frames++;
+ }
+ function physics(dt){
+  const d=dt*60;turn+=angular*d;angular*=Math.pow(.938,d);
+  for(const p of pieces){
+   p.x+=p.vx*d;p.y+=p.vy*d;p.angle+=p.spin*d;p.vx*=Math.pow(.88,d);p.vy*=Math.pow(.88,d);p.spin*=Math.pow(.9,d);
+   const dist=Math.hypot(p.x,p.y),max=.96-p.r*.55;
+   if(dist>max){const nx=p.x/dist,ny=p.y/dist;p.x=nx*max;p.y=ny*max;const v=p.vx*nx+p.vy*ny;p.vx-=nx*v*1.5;p.vy-=ny*v*1.5;}
+  }
+  for(let i=0;i<pieces.length;i++)for(let j=i+1;j<pieces.length;j++){
+   const a=pieces[i],b=pieces[j],dx=b.x-a.x,dy=b.y-a.y,rr=(a.r+b.r)*.53,dist=Math.hypot(dx,dy);
+   if(dist<rr&&dist>.001){const f=(rr-dist)*.12*d,nx=dx/dist,ny=dy/dist;a.x-=nx*f;a.y-=ny*f;b.x+=nx*f;b.y+=ny*f;}
+  }
+  open=mix(open,targetOpen,1-Math.pow(.85,d));if(Math.abs(open-targetOpen)<.001)open=targetOpen;
+  flash*=Math.pow(.83,d);settle=Math.max(0,settle-dt);
+ }
+ function step(now){
+  raf=0;const dt=Math.min(.033,(now-previous)/1000||.016);previous=now;
+  if(!document.hidden){physics(dt);texture();render();}
+  if(!document.hidden&&(pointer||settle>0||Math.abs(angular)>.0002||Math.abs(open-targetOpen)>.001))raf=requestAnimationFrame(step);
+ }
+ function wake(){if(!raf){previous=performance.now();raf=requestAnimationFrame(step);}}
+ function impulse(dx,dy){
+  const amount=dx*.48+dy*.15;turn+=amount;
+  for(const p of pieces){p.vx+=(-p.y*amount+dx*.17)*.14;p.vy+=(p.x*amount+dy*.17)*.14;p.spin+=amount*(.035+p.r*.3);}
+  angular=reduced.matches?0:amount*.19;settle=reduced.matches?.12:1.6;wake();
+ }
+ function oneTurn(dir=1){
+  metrics.turns++;if(reduced.matches){turn+=dir*.49;for(const p of pieces)p.angle+=dir*.075;texture();render();return;}
+  angular+=dir*.025;for(const p of pieces){p.vx+=-p.y*dir*.003;p.vy+=p.x*dir*.003;p.spin+=dir*.005;}settle=2;wake();
+ }
+ function toggle(){
+  targetOpen=targetOpen?0:1;metrics.opened++;document.getElementById('piece-tools').hidden=!targetOpen;document.querySelector('.room').classList.toggle('is-open',!!targetOpen);
+  document.getElementById('open').setAttribute('aria-pressed',String(!!targetOpen));
+  document.getElementById('open-label').textContent=targetOpen?'鏡に戻る':'硝子を見る';
+  document.getElementById('state').textContent=targetOpen?'模様のもと — 67個の硝子':'鏡の中';
+  document.getElementById('instruction').textContent=targetOpen?'硝子を光の扇へ。選んで「光の中へ」でも。':'硝子を転がすように、ゆっくりドラッグ。';
+  document.getElementById('announcement').textContent=targetOpen?'鏡を開きました。模様を作る元の硝子を表示しています。':'鏡を閉じました。硝子の反射による模様に戻りました。';
+  if(reduced.matches){open=targetOpen;texture();render();}else{settle=.9;wake();}
+ }
+ function renew(){
+  composition++;seed+=1013;metrics.renewed++;makeGlass();angular=0;
+  document.getElementById('scene').textContent=String(composition).padStart(2,'0');
+  document.getElementById('announcement').textContent='新しい硝子に入れ替えました。景色 '+composition+'。';
+  if(reduced.matches){settle=0;texture();render();}else wake();
+ }
+ input.addEventListener('pointerdown',e=>{
+  if(e.button!==0)return;const rect=canvas.getBoundingClientRect(),x=e.clientX-rect.left,y=e.clientY-rect.top;
+  if(Math.hypot(x-cx,y-cy)>R*1.14)return;
+  const local=toGlass(x,y);let held=null;
+  if(targetOpen){for(let i=pieces.length-1;i>=0;i--){const p=pieces[i];if(Math.hypot(local.x-p.x,local.y-p.y)<p.r*1.1){held=p;break;}}}
+  if(held){selected=pieces.indexOf(held);updateSelection();}pointer={id:e.pointerId,x:e.clientX,y:e.clientY,held};input.setPointerCapture(e.pointerId);input.classList.add('dragging');metrics.gestures++;angular=0;
+  if(e.pointerType==='mouse')input.focus({preventScroll:true});e.preventDefault();
+ });
+ function toGlass(x,y){const dx=(x-cx)/(R*.94),dy=(y-cy)/(R*.94);return{x:dx*Math.cos(turn)+dy*Math.sin(turn),y:-dx*Math.sin(turn)+dy*Math.cos(turn)};}
+ input.addEventListener('pointermove',e=>{
+  if(!pointer||pointer.id!==e.pointerId)return;
+  if(pointer.held){const rect=canvas.getBoundingClientRect(),local=toGlass(e.clientX-rect.left,e.clientY-rect.top),p=pointer.held;p.x=local.x;p.y=local.y;p.vx=p.vy=0;p.angle+=(e.clientX-pointer.x)*.004;settle=reduced.matches?.01:1;wake();}
+  else impulse((e.clientX-pointer.x)/R,(e.clientY-pointer.y)/R);
+  pointer.x=e.clientX;pointer.y=e.clientY;
+ });
+ function release(e){if(!pointer||e.pointerId!==pointer.id)return;pointer=null;input.classList.remove('dragging');settle=reduced.matches?0:1.5;wake();}
+ input.addEventListener('pointerup',release);input.addEventListener('pointercancel',release);input.addEventListener('lostpointercapture',release);
+ input.addEventListener('keydown',e=>{
+  if(targetOpen&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();const p=pieces[selected],dx=e.key==='ArrowRight'?.035:e.key==='ArrowLeft'?-.035:0,dy=e.key==='ArrowDown'?.035:e.key==='ArrowUp'?-.035:0;p.x+=dx*Math.cos(turn)+dy*Math.sin(turn);p.y+=-dx*Math.sin(turn)+dy*Math.cos(turn);settle=reduced.matches?.01:.3;wake();}
+  else if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();oneTurn(e.key==='ArrowLeft'?-1:1);}
+  else if(e.key==='Enter'){e.preventDefault();toggle();}
+  else if(e.key===' '){e.preventDefault();oneTurn();}
+  else if(e.key.toLowerCase()==='r'){e.preventDefault();renew();}
+ });
+ function updateSelection(){document.getElementById('piece-name').textContent='硝子 '+String(selected+1).padStart(2,'0');document.getElementById('announcement').textContent='硝子 '+(selected+1)+' を選びました。';wake();}
+ document.getElementById('prev-piece').onclick=()=>{selected=(selected+pieces.length-1)%pieces.length;updateSelection();};document.getElementById('next-piece').onclick=()=>{selected=(selected+1)%pieces.length;updateSelection();};
+ document.getElementById('place-piece').onclick=()=>{const p=pieces[selected];p.x=.62*Math.cos(turn);p.y=-.62*Math.sin(turn);p.vx=p.vy=0;settle=reduced.matches?.01:.4;wake();};
+ document.getElementById('save').onclick=()=>{const c=document.createElement('canvas');c.width=c.height=1400;const g=c.getContext('2d');g.fillStyle='#11191c';g.fillRect(0,0,1400,1400);const r=R*1.12;g.drawImage(canvas,(cx-r)*D,(cy-r)*D,r*2*D,r*2*D,0,0,1400,1400);const a=document.createElement('a');a.download='mangekyo-'+String(composition).padStart(2,'0')+'.png';a.href=c.toDataURL('image/png');a.click();document.getElementById('announcement').textContent='模様をPNGで保存しました。';};
+ document.getElementById('turn').addEventListener('click',()=>oneTurn());document.getElementById('open').addEventListener('click',toggle);document.getElementById('renew').addEventListener('click',renew);
+ reduced.addEventListener('change',()=>{if(reduced.matches){angular=0;open=targetOpen;settle=0;flash=0;for(const p of pieces){p.vx=p.vy=p.spin=0;}}wake();});
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)wake();});
+ new ResizeObserver(resize).observe(canvas);makeGlass();resize();
+ // Read-only local diagnostics for the prototype review; no persistence or network.
+ window.kaleidoscopeState=()=>({composition,open,targetOpen,turn,selected,selectedPosition:{x:pieces[selected].x,y:pieces[selected].y},reducedMotion:reduced.matches,pieces:pieces.length,metrics:{...metrics},width:W,height:H,radius:R,center:{x:cx,y:cy},animating:!!raf});
+})();
+</script>
+</body>
+</html>

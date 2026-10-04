@@ -1,0 +1,98 @@
+[
+  {
+    "file": "13-mangekyo.html",
+    "title": "万華鏡室",
+    "en": "THE KALEIDOSCOPE ROOM",
+    "maker": "Astra",
+    "desc": "色硝子を転がし、鏡の中の模様を探る。鏡を開いて欠片を動かすと、その一つが景色全体へ反復される。透ける硝子、金属の縁、キーボードによる個別操作と画像保存。",
+    "prompt": "Astra 013。旧案「継ぎ目」は不採用。万華鏡を別の題材として制作。見た目・操作・材料の変化を結び付ける。Astra初稿。全12作の不採用後、ユーザーの依頼により比較公開。"
+  },
+  {
+    "file": "14-kage.html",
+    "title": "影のアトリエ",
+    "en": "LIGHT / FORM / SHADOW",
+    "maker": "Astra",
+    "desc": "離れた四つの破片。光の位置が合うと、その影が一羽の鳥につながる。",
+    "prompt": "Astra 014改稿。三つの単純立体から、距離の異なる四片の投影彫刻へ変更。Astra初稿。不採用・比較公開。"
+  },
+  {
+    "file": "15-onshitsu.html",
+    "title": "午後の温室",
+    "en": "AN AFTERNOON UNDER GLASS",
+    "maker": "Astra",
+    "desc": "ガラス屋根の向こうから斜光が入り、鉢の列の奥へ小径が続く。手前の葉を風が通り、やがて蝶が横切り、薄い霧が葉へ戻る。操作をしなくても時間が流れる午後。",
+    "prompt": "Astra 015改稿。植栽を非対称に置き直し、蘭、近景の鉢・葉脈・露、局所的な斜光と影を追加。葉の規則性と素材の実在感には改善余地が残る。Astra初稿。不採用・比較公開。"
+  },
+  {
+    "file": "16-aya.html",
+    "title": "綾の織機",
+    "en": "WARP / WEFT / TIME",
+    "maker": "Astra",
+    "desc": "糸の色と組織を選び、杼を通す。縦糸と横糸の重なりから一枚の布が生まれる。織機から外し、模様を保存する。",
+    "prompt": "Astra 016。単独HTML、外部依存なし。PC、スマートフォン、キーボード、動きの軽減に対応。Astra初稿。不採用・比較公開。"
+  },
+  {
+    "file": "17-mado.html",
+    "title": "となりの窓",
+    "en": "NINE WINDOWS",
+    "maker": "Astra",
+    "desc": "九つの窓で、暮らしが少しずつ変わる。ピアノの手、鍋の湯気、帰宅する人影。部屋ごとに違う時間が流れる。",
+    "prompt": "Astra 017改稿。住人の画面内動作と物語の変化を部屋ごとにずらす。ナビと見出しの中間時刻のコントラストも修正。Astra初稿。不採用・比較公開。"
+  },
+  {
+    "file": "18-jiba.html",
+    "title": "見えない力",
+    "en": "THE SPACE BETWEEN TWO MAGNETS",
+    "maker": "Astra",
+    "desc": "磁石を動かし、向きを変える。何もない場所が曲線と砂鉄の流れで満たされる。",
+    "prompt": "Astra 018。単独HTML、外部依存なし。PC、スマートフォン、キーボード、動きの軽減に対応。Astra初稿。不採用・比較公開。"
+  },
+  {
+    "file": "19-kajitsu.html",
+    "title": "果実の断面",
+    "en": "AN UNIVERSE BENEATH THE SKIN",
+    "maker": "Astra",
+    "desc": "ざくろを薄く切り進める。深さごとに皮と膜、赤い粒の断面が現れる。",
+    "prompt": "Astra 019。Astra初稿。不採用・比較公開。通常TLSのブラウザでPC、モバイル、タッチ、キーボード、動き軽減、再操作を確認。"
+  },
+  {
+    "file": "20-sakyu.html",
+    "title": "砂丘、十六時",
+    "en": "NOTHING HERE IS STILL",
+    "maker": "Astra",
+    "desc": "光る稜線、日陰の風紋。遠い隊列が進み、残された足跡が風に薄れていく。",
+    "prompt": "Astra 020。Astra初稿。不採用・比較公開。通常TLSのブラウザでPC、モバイル、タッチ、キーボード、動き軽減、再操作を確認。"
+  },
+  {
+    "file": "21-kessho.html",
+    "title": "結晶室",
+    "en": "GROWING, ONE BRANCH AT A TIME",
+    "maker": "Astra",
+    "desc": "温度を選び、硝子に種を置く。静けさの中で結晶の枝が伸びていく。",
+    "prompt": "Astra 021。Astra初稿。不採用・比較公開。通常TLSのブラウザでPC、モバイル、タッチ、キーボード、動き軽減、再操作を確認。"
+  },
+  {
+    "file": "22-kappan.html",
+    "title": "ことばを、刷る",
+    "en": "THE SMALL PRINTING OFFICE",
+    "maker": "Astra",
+    "desc": "裏返しの活字にインクをのせ、紙へ刷る。自分のことばを組み、かすれのある一枚を残す。",
+    "prompt": "Astra 022。Astra初稿。不採用・比較公開。外部依存なしの単独HTML。PC・モバイル・キーボード・動き軽減・再操作を検証。"
+  },
+  {
+    "file": "23-lobby.html",
+    "title": "終映後のロビー",
+    "en": "TOKIWA CINEMA",
+    "maker": "Astra",
+    "desc": "赤い扉から最後の光。誰もいないロビーを見回すと、窓口、古いポスター、忘れ物のマフラーがある。",
+    "prompt": "Astra 023。Astra初稿。不採用・比較公開。外部依存なしの単独HTML。PC・モバイル・キーボード・動き軽減・再操作を検証。"
+  },
+  {
+    "file": "24-mayoibako.html",
+    "title": "迷い箱",
+    "en": "A SMALL WOODEN WORLD",
+    "maker": "Astra",
+    "desc": "木の箱を傾けて銀球を運ぶ。迷っても、行き止まりから戻れば道は続く。",
+    "prompt": "Astra 024。Astra初稿。不採用・比較公開。外部依存なしの単独HTML。PC・モバイル・キーボード・動き軽減・再操作を検証。"
+  }
+]
