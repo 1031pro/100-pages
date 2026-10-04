@@ -1,36 +1,31 @@
 # 100 Pages
 
-1ページ1コンセプトで作る100枚のウェブページ。すべて日本語で読める。
+1ページ1コンセプト、日本語で触れて楽しむ作品集。
 
-ルール：目を奪うこと（look stunning）／同じデザインを二度使わないこと（zero repetitive designs）／全力で遊ぶこと（go full creative mode）。
+## 掲載順と制作モデル
 
-## 構成
+- 001〜012：Fable 5.1
+- 013〜024：Astra 初稿
+- 025〜036：Astra 再制作 R2
 
-- `index.html` … ギャラリー（ルート）。ページを追加したら `pages` 配列に1行足す
-- `pages/NN-slug.html` … 各ページ。外部依存は Google Fonts のみ、他はすべて単一ファイルに内包
-- `.nojekyll` … GitHub Pages で Jekyll 処理を止める
+既存24作品を保持し、その続きに再制作12作を追加した全36景です。ユーザーによる個別の除外指定は後日予定されており、現在は削除・除外・初稿の一括不採用扱いをしていません。`_archive/07-suminagashi.html` は退避のままです。
 
-## GitHub Pages で公開する手順
+ルート`index.html`は全36景、`revisions/astra-r2/index.html`は25〜36の一覧です。各R2作品内の戻りリンクは全36景一覧の該当番号へ戻ります。R2ファイル名の13〜24は制作時の内部IDで、公開表示番号25〜36との対応は[R2追加記録](docs/PUBLISHED-ASTRA-R2.md)に記載しています。
 
-1. このフォルダで `git init` → `git add -A` → `git commit -m "feat: first 10 pages"`
-2. GitHub にリポジトリを作成し `git remote add origin ...` → `git push -u origin main`
-3. リポジトリの Settings → Pages → Source を「Deploy from a branch」、Branch を `main` / `/ (root)` にして保存
-4. 数分後 `https://<user>.github.io/<repo>/` で `index.html` が表示される
+## ファイル構成
 
-各ページはルート相対ではなく相対パス（`pages/...`）でリンクしているので、サブパス配信でもそのまま動く。
+- `pages/`：Fable 01〜12とAstra初稿13〜24。既存HTMLは変更なし。
+- `revisions/astra-r2/pages/`：再制作R2の自己完結HTML。外部サービス・API・追加ライブラリーに依存しない。
+- `revisions/astra-r2/previews/`：公開用番号を表示した実画面の静止プレビュー。
+- `docs/`：制作時の履歴、最新掲載方針、番号対応。
 
-## 制作モデルの区分
+Cloud開始点のトップ名`Fable 5.1 Studies`は維持しています。Windows記録の「百景」との差異は既存の記録どおりです。元ギャラリーとFable作品にあるGoogle Fonts参照は既存のままで、依存を追加していません。
 
-- **001〜012：Fable 5.1** — 既存12作品。各HTMLは変更していない。
-- **013〜024：Astraの制作範囲** — 初稿12作は不採用。ユーザーの依頼により現行版を比較公開。再制作版は別管理。
+## 確認と公開状態
 
-制作順・状態は [Astra制作記録](docs/ASTRA-013-024.md)。旧案「継ぎ目」は不採用で完成数に含めない。`_archive/07-suminagashi.html` は退避のまま。
+ローカルでは、このフォルダーで`python -m http.server 8000`を実行し、`http://localhost:8000/`を開けます。
 
-Cloudの開始点 `25debb6` ではトップ名が `Fable 5.1 Studies`。Windows記録の「百景」との差異を残し、トップ名は変更していない。
+既存公開先：https://1031pro.github.io/100-pages/
+追加前の公開コミット：`0f0fd17a3691206dbea5ca0596fe11c6a6e9945a`（24作品）。
 
-Astraの作品は外部フォント・外部画像・スクリプト・APIに依存しない単独HTML。操作中心だけでなく情景中心の作品も制作する。候補ごとの画像・短い動画・単独HTML・検証結果を保存し、ソースのチェックポイントは動画と分ける。
-
-2026-10-04、ユーザーの明示依頼により初稿12作の現行版を既存GitHub Pagesへ比較公開する。22のモバイル配置修正を含む。再制作途中の作品は公開対象に含めない。
-
-公開先：https://1031pro.github.io/100-pages/
-公開経路：既存の main ブランチ → GitHub Pages の pages build and deployment。
+2026-10-04、ユーザーの「再制作R2の順次公開を承認する」という直接承認に基づく公開内容です。既存main→GitHub Pagesの経路を使い、認証・権限・課金・ブランチ保護の設定は変更しません。

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:,">
 <title>Fable 5.1 Studies</title>
-<meta name="description" content="視覚作品集。001〜012はFable 5.1、013からはAstraによる制作。">
+<meta name="description" content="日本語で触れて楽しむ36景。001〜012はFable、013〜024はAstra初稿、025〜036はAstra再制作R2。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@500;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -64,7 +64,7 @@
   footer a { color: var(--acc1); text-decoration: none; }
   @media (max-width: 520px) { .tools { flex-wrap: wrap; } .search { flex-basis: 100%; min-width: 0; } .count { margin-left: auto; } }
   @media (max-width: 720px) { .body { grid-template-columns: 1fr; } .btns { flex-direction: row; } header { padding-top: 36px; } }
-</style>
+.card.r2 .preview{aspect-ratio:1.44;background:#e8e4d9}.preview img{display:block;width:100%;height:100%;object-fit:cover}.chapter.r2{border-top-color:#607d68}.chapter.r2 h2{color:#47614e}.production-note a{display:inline-block}.production-note a:first-of-type{margin-left:0}</style>
 </head>
 <body>
 <div class="wrap">
@@ -72,7 +72,7 @@
     <div class="kicker">COLLECTION · <span id="totalKicker">0</span> STUDIES</div>
     <h1>Fable 5.1 <span>Studies</span></h1>
     <p class="lead">生成アート、物理シミュレーション、風景、インターフェース、遊べるもの。カードを開くと動く実物へ。「プロンプト」で、その作品を生み出した指示文が読める。</p>
-    <p class="production-note">制作区分：001–012 · Fable 5.1 ／ 013〜 · Astra <a href="#study-013">Astraの制作区分へ ↓</a></p>
+    <p class="production-note">001–012 · Fable 5.1 ／ 013–024 · Astra 初稿 ／ 025–036 · Astra 再制作 R2<br><a href="#study-001">Fableへ ↓</a><a href="#study-013">Astra初稿へ ↓</a><a href="#study-025">再制作 R2へ ↓</a></p>
     <div class="tools">
       <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" aria-label="作品を検索" type="search" placeholder="題名・番号・プロンプトで検索…"></label>
       <div class="count"><b id="shown">0</b> / <span id="total">0</span> STUDIES</div>
@@ -81,7 +81,7 @@
   <main class="list" id="list"></main>
   <footer>
     <div>Fable 5.1 Studies</div>
-    <div>001–012: Claude Fable 5.1 · 013〜: Astra</div>
+    <div>001–012: Fable 5.1 · 013–024: Astra 初稿 · 025–036: Astra R2</div>
   </footer>
 </div>
 
@@ -123,64 +123,58 @@ const pages = [
   { file: '12-yukiguni.html', title: '雪野駅', en: 'SNOW COUNTRY STATION',
     desc: '深夜、雪の降り続く木造の駅。三層の雪が風に流れ、街灯の光の中だけ明るく光る。傘をさした人影の白い息。数十秒おきに最終列車が減速して停まり、扉が開き、去っていく。積雪はゆっくり増える。',
     prompt: '雪国の小さな木造駅の深夜をキャンバスで作って。雪をかぶった山並みと杉林、雪の積もった線路、ホーム、暖色の窓と入口の明かりがある駅舎、駅名板「雪野」、街灯、ベンチに傘をさした人影と白い息。雪は奥行きの異なる千数百個の粒で、風（マウス位置で変わる）に流れ、街灯の光の円錐に入ると明るくなる。手前には大きくぼけた雪。列車が左から減速して到着し、扉が開いて数秒停車し、加速して去る。前照灯の光芒と尾灯、屋根の雪。右上に気温・積雪・風速、下に次の列車までの秒数。' },
-  {"file": "13-mangekyo.html", "title": "万華鏡室", "en": "THE KALEIDOSCOPE ROOM", "maker": "Astra", "desc": "色硝子を転がし、鏡の中の模様を探る。鏡を開いて欠片を動かすと、その一つが景色全体へ反復される。透ける硝子、金属の縁、キーボードによる個別操作と画像保存。", "prompt": "Astra 013。旧案「継ぎ目」は不採用。万華鏡を別の題材として制作。見た目・操作・材料の変化を結び付ける。Astra初稿。全12作の不採用後、ユーザーの依頼により比較公開。"},
-  {"file": "14-kage.html", "title": "影のアトリエ", "en": "LIGHT / FORM / SHADOW", "maker": "Astra", "desc": "離れた四つの破片。光の位置が合うと、その影が一羽の鳥につながる。", "prompt": "Astra 014改稿。三つの単純立体から、距離の異なる四片の投影彫刻へ変更。Astra初稿。不採用・比較公開。"},
-  {"file": "15-onshitsu.html", "title": "午後の温室", "en": "AN AFTERNOON UNDER GLASS", "maker": "Astra", "desc": "ガラス屋根の向こうから斜光が入り、鉢の列の奥へ小径が続く。手前の葉を風が通り、やがて蝶が横切り、薄い霧が葉へ戻る。操作をしなくても時間が流れる午後。", "prompt": "Astra 015改稿。植栽を非対称に置き直し、蘭、近景の鉢・葉脈・露、局所的な斜光と影を追加。葉の規則性と素材の実在感には改善余地が残る。Astra初稿。不採用・比較公開。"},
-  {"file": "16-aya.html", "title": "綾の織機", "en": "WARP / WEFT / TIME", "maker": "Astra", "desc": "糸の色と組織を選び、杼を通す。縦糸と横糸の重なりから一枚の布が生まれる。織機から外し、模様を保存する。", "prompt": "Astra 016。単独HTML、外部依存なし。PC、スマートフォン、キーボード、動きの軽減に対応。Astra初稿。不採用・比較公開。"},
-  {"file": "17-mado.html", "title": "となりの窓", "en": "NINE WINDOWS", "maker": "Astra", "desc": "九つの窓で、暮らしが少しずつ変わる。ピアノの手、鍋の湯気、帰宅する人影。部屋ごとに違う時間が流れる。", "prompt": "Astra 017改稿。住人の画面内動作と物語の変化を部屋ごとにずらす。ナビと見出しの中間時刻のコントラストも修正。Astra初稿。不採用・比較公開。"},
-  {"file": "18-jiba.html", "title": "見えない力", "en": "THE SPACE BETWEEN TWO MAGNETS", "maker": "Astra", "desc": "磁石を動かし、向きを変える。何もない場所が曲線と砂鉄の流れで満たされる。", "prompt": "Astra 018。単独HTML、外部依存なし。PC、スマートフォン、キーボード、動きの軽減に対応。Astra初稿。不採用・比較公開。"},
-  {"file": "19-kajitsu.html", "title": "果実の断面", "en": "AN UNIVERSE BENEATH THE SKIN", "maker": "Astra", "desc": "ざくろを薄く切り進める。深さごとに皮と膜、赤い粒の断面が現れる。", "prompt": "Astra 019。Astra初稿。不採用・比較公開。通常TLSのブラウザでPC、モバイル、タッチ、キーボード、動き軽減、再操作を確認。"},
-  {"file": "20-sakyu.html", "title": "砂丘、十六時", "en": "NOTHING HERE IS STILL", "maker": "Astra", "desc": "光る稜線、日陰の風紋。遠い隊列が進み、残された足跡が風に薄れていく。", "prompt": "Astra 020。Astra初稿。不採用・比較公開。通常TLSのブラウザでPC、モバイル、タッチ、キーボード、動き軽減、再操作を確認。"},
-  {"file": "21-kessho.html", "title": "結晶室", "en": "GROWING, ONE BRANCH AT A TIME", "maker": "Astra", "desc": "温度を選び、硝子に種を置く。静けさの中で結晶の枝が伸びていく。", "prompt": "Astra 021。Astra初稿。不採用・比較公開。通常TLSのブラウザでPC、モバイル、タッチ、キーボード、動き軽減、再操作を確認。"},
-  {"file": "22-kappan.html", "title": "ことばを、刷る", "en": "THE SMALL PRINTING OFFICE", "maker": "Astra", "desc": "裏返しの活字にインクをのせ、紙へ刷る。自分のことばを組み、かすれのある一枚を残す。", "prompt": "Astra 022。Astra初稿。不採用・比較公開。外部依存なしの単独HTML。PC・モバイル・キーボード・動き軽減・再操作を検証。"},
-  {"file": "23-lobby.html", "title": "終映後のロビー", "en": "TOKIWA CINEMA", "maker": "Astra", "desc": "赤い扉から最後の光。誰もいないロビーを見回すと、窓口、古いポスター、忘れ物のマフラーがある。", "prompt": "Astra 023。Astra初稿。不採用・比較公開。外部依存なしの単独HTML。PC・モバイル・キーボード・動き軽減・再操作を検証。"},
-  {"file": "24-mayoibako.html", "title": "迷い箱", "en": "A SMALL WOODEN WORLD", "maker": "Astra", "desc": "木の箱を傾けて銀球を運ぶ。迷っても、行き止まりから戻れば道は続く。", "prompt": "Astra 024。Astra初稿。不採用・比較公開。外部依存なしの単独HTML。PC・モバイル・キーボード・動き軽減・再操作を検証。"},
+  {"file": "13-mangekyo.html", "title": "万華鏡室", "en": "THE KALEIDOSCOPE ROOM", "maker": "Astra", "desc": "色硝子を転がし、鏡の中の模様を探る。鏡を開いて欠片を動かすと、その一つが景色全体へ反復される。透ける硝子、金属の縁、キーボードによる個別操作と画像保存。", "prompt": "Astra 013。旧案「継ぎ目」から題材を変え、万華鏡として制作。見た目・操作・材料の変化を結び付ける。Astra初稿。既存のAstra初稿として掲載。"},
+  {"file": "14-kage.html", "title": "影のアトリエ", "en": "LIGHT / FORM / SHADOW", "maker": "Astra", "desc": "離れた四つの破片。光の位置が合うと、その影が一羽の鳥につながる。", "prompt": "Astra 014改稿。三つの単純立体から、距離の異なる四片の投影彫刻へ変更。Astra初稿。初稿として掲載。"},
+  {"file": "15-onshitsu.html", "title": "午後の温室", "en": "AN AFTERNOON UNDER GLASS", "maker": "Astra", "desc": "ガラス屋根の向こうから斜光が入り、鉢の列の奥へ小径が続く。手前の葉を風が通り、やがて蝶が横切り、薄い霧が葉へ戻る。操作をしなくても時間が流れる午後。", "prompt": "Astra 015改稿。植栽を非対称に置き直し、蘭、近景の鉢・葉脈・露、局所的な斜光と影を追加。葉の規則性と素材の実在感には改善余地が残る。Astra初稿。初稿として掲載。"},
+  {"file": "16-aya.html", "title": "綾の織機", "en": "WARP / WEFT / TIME", "maker": "Astra", "desc": "糸の色と組織を選び、杼を通す。縦糸と横糸の重なりから一枚の布が生まれる。織機から外し、模様を保存する。", "prompt": "Astra 016。単独HTML、外部依存なし。PC、スマートフォン、キーボード、動きの軽減に対応。Astra初稿。初稿として掲載。"},
+  {"file": "17-mado.html", "title": "となりの窓", "en": "NINE WINDOWS", "maker": "Astra", "desc": "九つの窓で、暮らしが少しずつ変わる。ピアノの手、鍋の湯気、帰宅する人影。部屋ごとに違う時間が流れる。", "prompt": "Astra 017改稿。住人の画面内動作と物語の変化を部屋ごとにずらす。ナビと見出しの中間時刻のコントラストも修正。Astra初稿。初稿として掲載。"},
+  {"file": "18-jiba.html", "title": "見えない力", "en": "THE SPACE BETWEEN TWO MAGNETS", "maker": "Astra", "desc": "磁石を動かし、向きを変える。何もない場所が曲線と砂鉄の流れで満たされる。", "prompt": "Astra 018。単独HTML、外部依存なし。PC、スマートフォン、キーボード、動きの軽減に対応。Astra初稿。初稿として掲載。"},
+  {"file": "19-kajitsu.html", "title": "果実の断面", "en": "AN UNIVERSE BENEATH THE SKIN", "maker": "Astra", "desc": "ざくろを薄く切り進める。深さごとに皮と膜、赤い粒の断面が現れる。", "prompt": "Astra 019。Astra初稿。初稿として掲載。通常TLSのブラウザでPC、モバイル、タッチ、キーボード、動き軽減、再操作を確認。"},
+  {"file": "20-sakyu.html", "title": "砂丘、十六時", "en": "NOTHING HERE IS STILL", "maker": "Astra", "desc": "光る稜線、日陰の風紋。遠い隊列が進み、残された足跡が風に薄れていく。", "prompt": "Astra 020。Astra初稿。初稿として掲載。通常TLSのブラウザでPC、モバイル、タッチ、キーボード、動き軽減、再操作を確認。"},
+  {"file": "21-kessho.html", "title": "結晶室", "en": "GROWING, ONE BRANCH AT A TIME", "maker": "Astra", "desc": "温度を選び、硝子に種を置く。静けさの中で結晶の枝が伸びていく。", "prompt": "Astra 021。Astra初稿。初稿として掲載。通常TLSのブラウザでPC、モバイル、タッチ、キーボード、動き軽減、再操作を確認。"},
+  {"file": "22-kappan.html", "title": "ことばを、刷る", "en": "THE SMALL PRINTING OFFICE", "maker": "Astra", "desc": "裏返しの活字にインクをのせ、紙へ刷る。自分のことばを組み、かすれのある一枚を残す。", "prompt": "Astra 022。Astra初稿。初稿として掲載。外部依存なしの単独HTML。PC・モバイル・キーボード・動き軽減・再操作を検証。"},
+  {"file": "23-lobby.html", "title": "終映後のロビー", "en": "TOKIWA CINEMA", "maker": "Astra", "desc": "赤い扉から最後の光。誰もいないロビーを見回すと、窓口、古いポスター、忘れ物のマフラーがある。", "prompt": "Astra 023。Astra初稿。初稿として掲載。外部依存なしの単独HTML。PC・モバイル・キーボード・動き軽減・再操作を検証。"},
+  {"file": "24-mayoibako.html", "title": "迷い箱", "en": "A SMALL WOODEN WORLD", "maker": "Astra", "desc": "木の箱を傾けて銀球を運ぶ。迷っても、行き止まりから戻れば道は続く。", "prompt": "Astra 024。Astra初稿。初稿として掲載。外部依存なしの単独HTML。PC・モバイル・キーボード・動き軽減・再操作を検証。"},
+  {"file": "13-tsuyu.html", "href": "revisions/astra-r2/pages/13-tsuyu.html", "preview": "revisions/astra-r2/previews/25.webp", "title": "露の庭", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "糸に触れて、離す。露の重さが、小さな振動になって伝わる。", "prompt": "Astra 025 · 再制作 R2。糸に触れて、離す。露の重さが、小さな振動になって伝わる。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
+  {"file": "14-funatsukiba.html", "href": "revisions/astra-r2/pages/14-funatsukiba.html", "preview": "revisions/astra-r2/previews/26.webp", "title": "風待ちの船着場", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "ひと結びをほどく。誰も乗っていない舟が、夏の水面を離れていく。", "prompt": "Astra 026 · 再制作 R2。ひと結びをほどく。誰も乗っていない舟が、夏の水面を離れていく。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
+  {"file": "15-nokoriga.html", "href": "revisions/astra-r2/pages/15-nokoriga.html", "preview": "revisions/astra-r2/previews/27.webp", "title": "残り香", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "指先のひと息で、煙がほどける。陶と灰に残る午後の光。", "prompt": "Astra 027 · 再制作 R2。指先のひと息で、煙がほどける。陶と灰に残る午後の光。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
+  {"file": "16-yakou.html", "href": "revisions/astra-r2/pages/16-yakou.html", "preview": "revisions/astra-r2/previews/28.webp", "title": "夜を渡る", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "曇った車窓を指で拭く。知らない街の灯が、その向こうを流れていく。", "prompt": "Astra 028 · 再制作 R2。曇った車窓を指で拭く。知らない街の灯が、その向こうを流れていく。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
+  {"file": "17-kaigara.html", "href": "revisions/astra-r2/pages/17-kaigara.html", "preview": "revisions/astra-r2/previews/29.webp", "title": "貝にひそむ虹", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "貝を回す。内側に隠れていた虹が、光の角度で現れる。", "prompt": "Astra 029 · 再制作 R2。貝を回す。内側に隠れていた虹が、光の角度で現れる。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
+  {"file": "18-shiori.html", "href": "revisions/astra-r2/pages/18-shiori.html", "preview": "revisions/astra-r2/previews/30.webp", "title": "栞の森", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "本をひらくと、紙の森と小鹿が立ち上がる。", "prompt": "Astra 030 · 再制作 R2。本をひらくと、紙の森と小鹿が立ち上がる。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
+  {"file": "19-muginoumi.html", "href": "revisions/astra-r2/pages/19-muginoumi.html", "preview": "revisions/astra-r2/previews/31.webp", "title": "麦の海", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "穂の上をなでる。風のかたちが、遠くの麦へ伝わっていく。", "prompt": "Astra 031 · 再制作 R2。穂の上をなでる。風のかたちが、遠くの麦へ伝わっていく。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
+  {"file": "20-kazewohosu.html", "href": "revisions/astra-r2/pages/20-kazewohosu.html", "preview": "revisions/astra-r2/previews/32.webp", "title": "風を干す", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "白い布の裾を持ち上げる。指先からしわが生まれ、離すとほどける。", "prompt": "Astra 032 · 再制作 R2。白い布の裾を持ち上げる。指先からしわが生まれ、離すとほどける。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
+  {"file": "21-aoninokoru.html", "href": "revisions/astra-r2/pages/21-aoninokoru.html", "preview": "revisions/astra-r2/previews/33.webp", "title": "青に残る", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "陽にあてた紙から葉をめくる。触れていたところに、白い像が残る。", "prompt": "Astra 033 · 再制作 R2。陽にあてた紙から葉をめくる。触れていたところに、白い像が残る。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
+  {"file": "22-coffee.html", "href": "revisions/astra-r2/pages/22-coffee.html", "preview": "revisions/astra-r2/previews/34.webp", "title": "珈琲の余白", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "匙で円を描く。クリームの筋が、珈琲の上に新しいかたちをつくる。", "prompt": "Astra 034 · 再制作 R2。匙で円を描く。クリームの筋が、珈琲の上に新しいかたちをつくる。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
+  {"file": "23-tsuchinokioku.html", "href": "revisions/astra-r2/pages/23-tsuchinokioku.html", "preview": "revisions/astra-r2/previews/35.webp", "title": "土の記憶", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "器の縁や胴をそっと引く。触れた高さだけ、土が違う形になる。", "prompt": "Astra 035 · 再制作 R2。器の縁や胴をそっと引く。触れた高さだけ、土が違う形になる。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
+  {"file": "24-gennohikari.html", "href": "revisions/astra-r2/pages/24-gennohikari.html", "preview": "revisions/astra-r2/previews/36.webp", "title": "弦のひかり", "en": "ASTRA · REVISION 2", "maker": "Astra", "edition": "R2", "desc": "細い弦を引いて、離す。指のあとに、ひとすじの余韻が残る。", "prompt": "Astra 036 · 再制作 R2。細い弦を引いて、離す。指のあとに、ひとすじの余韻が残る。 PC・スマートフォン・キーボード・動きを減らす設定に対応した単独HTML作品。"},
 ];
 
 const list = document.getElementById('list');
 document.getElementById('total').textContent = pages.length;
 document.getElementById('totalKicker').textContent = pages.length;
 const chapters = [];
-const cards = pages.map((p, i) => {
-  const maker = p.maker || 'Fable 5.1';
-  if (i === 0 || i === 12) {
-    const chapter = document.createElement('section');
-    chapter.className = 'chapter' + (i === 12 ? ' astra' : '');
-    chapter.dataset.maker = maker;
-    chapter.setAttribute('aria-label', maker + 'の制作区分');
-    chapter.innerHTML = i === 0
-      ? '<h2>001–012 · Fable 5.1</h2><p>ここまでの十二景。既存作品は、そのままに。</p>'
-      : '<h2>013–024 · Astra 初稿</h2><p>001〜012はFable 5.1。以下の12作は不採用となったAstra初稿です。比較のため現行版を公開しています。再制作版は含みません。</p>';
-    list.appendChild(chapter); chapters.push(chapter);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cards = pages.map((p,i) => {
+  const maker=p.maker||'Fable 5.1', group=i<12?'fable':i<24?'astra-r1':'astra-r2', no=String(i+1).padStart(3,'0'), href=p.href||'pages/'+p.file;
+  if(i===0||i===12||i===24){
+    const chapter=document.createElement('section');chapter.className='chapter'+(i>=12?' astra':'')+(i===24?' r2':'');chapter.dataset.chapter=group;
+    const text=i===0?['001–012 · Fable 5.1','最初の十二景。']:i===12?['013–024 · Astra 初稿','Fableに続く、Astraによる十二景。']:['025–036 · Astra 再制作 R2','初稿の続きに加わる十二景。光、手ざわり、触れたあとの余韻。'];
+    chapter.setAttribute('aria-label',text[0]);chapter.innerHTML='<h2>'+text[0]+'</h2><p>'+text[1]+'</p>';list.appendChild(chapter);chapters.push(chapter);
   }
-  const no = String(i + 1).padStart(3, '0');
-  const el = document.createElement('article');
-  el.className = 'card'; el.id = 'study-' + no; el.dataset.maker = maker; el.dataset.q = (maker + ' ' + no + ' ' + p.title + ' ' + p.en + ' ' + p.desc + ' ' + p.prompt).toLowerCase();
-  el.innerHTML = `
-    <div class="preview" data-src="pages/${p.file}"><div class="cover">LOADING</div><div class="no">${no}</div><a class="tap" href="pages/${p.file}" target="_blank" rel="noopener" aria-label="${p.title} を開く"></a></div>
-    <div class="body">
-      <div><h2><small>${no} · ${p.en}</small>${p.title}</h2><span class="maker">制作 · ${maker}</span><p>${p.desc}</p></div>
-      <div class="btns"><a href="pages/${p.file}" target="_blank" rel="noopener">開く</a><button type="button" aria-expanded="false" aria-controls="prompt-${no}">${p.maker ? '制作メモ' : 'プロンプト'}</button></div>
-    </div>
-    <div class="prompt" id="prompt-${no}"><div class="lbl">${p.maker ? 'BRIEF · 依頼とAstraの構想' : 'PROMPT · この作品を生成する指示文'}</div><pre>${p.prompt}</pre></div>`;
-  el.querySelector('button').addEventListener('click', (e) => { const pr = el.querySelector('.prompt'); pr.classList.toggle('on'); e.currentTarget.classList.toggle('on', pr.classList.contains('on')); e.currentTarget.setAttribute('aria-expanded', String(pr.classList.contains('on'))); });
-  list.appendChild(el);
-  return el;
+  const el=document.createElement('article');el.className='card'+(p.edition==='R2'?' r2':'');el.id='study-'+no;el.dataset.number=i+1;el.dataset.chapter=group;el.dataset.maker=maker;
+  el.dataset.q=(maker+' '+(p.edition==='R2'?'再制作 R2':p.maker?'初稿 R1':'')+' '+no+' '+p.title+' '+p.en+' '+p.desc+' '+p.prompt).toLowerCase();
+  const preview=p.preview?'<img src="'+esc(p.preview)+'" width="960" height="667" loading="lazy" alt="'+esc(p.title)+'の実画面">':'<div class="cover">LOADING</div>';
+  el.innerHTML=`<div class="preview" ${p.preview?'':'data-src="'+esc(href)+'"'}>${preview}<div class="no">${no}</div><a class="tap" href="${esc(href)}" target="_blank" rel="noopener" aria-label="${esc(no+' '+p.title+'を開く')}"></a></div>
+  <div class="body"><div><h2><small>${no} · ${esc(p.en)}</small>${esc(p.title)}</h2><span class="maker">制作 · ${esc(maker)}${p.edition==='R2'?' / 再制作 R2':p.maker?' / 初稿':''}</span><p>${esc(p.desc)}</p></div><div class="btns"><a href="${esc(href)}" target="_blank" rel="noopener">開く</a><button type="button" aria-expanded="false" aria-controls="prompt-${no}">${p.maker?'制作メモ':'プロンプト'}</button></div></div>
+  <div class="prompt" id="prompt-${no}"><div class="lbl">${p.maker?'BRIEF · 依頼とAstraの構想':'PROMPT · この作品を生成する指示文'}</div><pre>${esc(p.prompt)}</pre></div>`;
+  el.querySelector('button').addEventListener('click',e=>{const pr=el.querySelector('.prompt');pr.classList.toggle('on');e.currentTarget.classList.toggle('on',pr.classList.contains('on'));e.currentTarget.setAttribute('aria-expanded',String(pr.classList.contains('on')))});
+  list.appendChild(el);return el;
 });
-
-// 見えているカードだけ iframe を読み込む（重い作品が同時に動かないように）
-const io = new IntersectionObserver((entries) => {
-  entries.forEach(en => {
-    const pv = en.target; let f = pv.querySelector('iframe');
-    if (en.isIntersecting) { if (!f) { f = document.createElement('iframe'); f.src = pv.dataset.src; f.loading = 'lazy'; f.tabIndex = -1; f.setAttribute('aria-hidden', 'true'); pv.insertBefore(f, pv.querySelector('.no')); } }
-    else if (f) f.remove();
-  });
-}, { rootMargin: '200px 0px' });
-cards.forEach(c => io.observe(c.querySelector('.preview')));
-
-const q = document.getElementById('q'), shown = document.getElementById('shown');
-const filter = () => { const v = q.value.trim().toLowerCase(); let n = 0; cards.forEach(c => { const ok = !v || c.dataset.q.includes(v); c.classList.toggle('hidden', !ok); if (ok) n++; }); shown.textContent = n; chapters.forEach(ch => ch.classList.toggle('hidden', !cards.some(c => c.dataset.maker === ch.dataset.maker && !c.classList.contains('hidden')))); };
-q.addEventListener('input', filter); filter();
-</script>
-</body>
-</html>
+const io=new IntersectionObserver(entries=>entries.forEach(en=>{const pv=en.target;let f=pv.querySelector('iframe');if(en.isIntersecting){if(!f){f=document.createElement('iframe');f.src=pv.dataset.src;f.loading='lazy';f.tabIndex=-1;f.setAttribute('aria-hidden','true');pv.insertBefore(f,pv.querySelector('.no'))}}else if(f)f.remove()}),{rootMargin:'200px 0px'});
+document.querySelectorAll('.preview[data-src]').forEach(p=>io.observe(p));
+const q=document.getElementById('q'),shown=document.getElementById('shown');
+function filter(){const v=q.value.trim().toLowerCase(),numeric=/^\d{1,3}$/.test(v);let n=0;cards.forEach(c=>{const ok=!v||(numeric?Number(c.dataset.number)===Number(v):c.dataset.q.includes(v));c.classList.toggle('hidden',!ok);if(ok)n++});shown.textContent=n;chapters.forEach(ch=>ch.classList.toggle('hidden',!cards.some(c=>c.dataset.chapter===ch.dataset.chapter&&!c.classList.contains('hidden'))))}
+q.addEventListener('input',filter);filter();
+// Hash destinations are created by the gallery script, so align direct links after creation.
+if(/^#study-\d{3}$/.test(location.hash))requestAnimationFrame(()=>document.getElementById(location.hash.slice(1))?.scrollIntoView());
+</script></body></html>
